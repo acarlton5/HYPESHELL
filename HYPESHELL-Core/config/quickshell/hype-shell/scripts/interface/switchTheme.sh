@@ -102,13 +102,20 @@ with open('$TARGET', 'w') as f:
 "
     }
   else
-    # Fallback: write the simple palette directly (limited but functional).
+    # Fallback: merge the theme palette over the current colors so sparse
+    # store themes can still apply without erasing the full Material palette.
     python3 -c "
 import json
 with open('$QML_SETTINGS', encoding='utf-8-sig') as f:
     data = json.load(f)
+try:
+    with open('$TARGET', encoding='utf-8-sig') as f:
+        current = json.load(f)
+except Exception:
+    current = {}
+current.update(data.get('$SECTION', {}))
 with open('$TARGET', 'w') as f:
-    json.dump(data['$SECTION'], f, indent=2)
+    json.dump(current, f, indent=2)
 "
   fi
 

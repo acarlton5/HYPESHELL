@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#fabd2f"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Gruvbox Retro",
+    "id":  "gruvbox-retro"
+}

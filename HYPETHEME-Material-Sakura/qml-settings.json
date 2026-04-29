@@ -1,0 +1,8 @@
+{
+    "colorsLight":  {
+                        "primary":  "#d81b60"
+                    },
+    "colorsDark":  {
+                       "primary":  "#ffb7c5"
+                   }
+}

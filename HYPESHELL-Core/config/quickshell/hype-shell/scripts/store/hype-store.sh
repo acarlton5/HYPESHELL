@@ -12,6 +12,7 @@ usage() {
 Usage:
   hype-store.sh list HYPEMODULE|HYPEGADGET|HYPETHEME
   hype-store.sh install HYPEMODULE|HYPEGADGET|HYPETHEME <id>
+  hype-store.sh apply HYPETHEME <id>
   hype-store.sh uninstall HYPEMODULE|HYPEGADGET|HYPETHEME <id>
 EOF
 }
@@ -47,6 +48,23 @@ kind_root() {
     HYPEMODULE) printf '%s\n' "$MODULES_ROOT" ;;
     HYPEGADGET) printf '%s\n' "$GADGETS_ROOT" ;;
     HYPETHEME) printf '%s\n' "$THEMES_ROOT" ;;
+  esac
+}
+
+theme_is_valid() {
+  local dir="$1"
+  [[ -f "$dir/theme.json" || -f "$dir/qml-settings.json" || -d "$dir/wallpapers" ]]
+}
+
+package_is_installed() {
+  local package_type="$1"
+  local dir="$2"
+
+  [[ -d "$dir" ]] || return 1
+
+  case "$(kind_key "$package_type")" in
+    HYPETHEME) theme_is_valid "$dir" ;;
+    *) [[ -f "$dir/manifest.json" ]] ;;
   esac
 }
 
@@ -140,7 +158,7 @@ list_kind() {
       local package_id installed
       package_id="$(jq -r '.id' <<<"$entry")"
       installed=false
-      [[ -d "$root/$package_id" ]] && installed=true
+      package_is_installed "$package_type" "$root/$package_id" && installed=true
       jq -c --argjson installed "$installed" '. + {installed: $installed}' <<<"$entry"
     done | jq -s '.'
 }
@@ -187,7 +205,55 @@ install_entry() {
     exit 1
   }
 
-  echo "installed $package_type/$id"
+  if [[ "$package_type" == "HYPETHEME" ]]; then
+    theme_is_valid "$target" || {
+      rm -rf "$target"
+      echo "Installed theme has no theme.json, qml-settings.json, or wallpapers: $target" >&2
+      exit 1
+    }
+    apply_theme "$id"
+    echo "installed and applied $package_type/$id"
+  else
+    echo "installed $package_type/$id"
+  fi
+}
+
+apply_theme() {
+  local id target mode wallpaper
+  id="$(safe_id "$1")"
+  target="$THEMES_ROOT/$id"
+
+  theme_is_valid "$target" || {
+    echo "Theme is not installed or has no theme content: $id" >&2
+    exit 1
+  }
+
+  mkdir -p "$HOME/.config/hype"
+  printf 'hypeTheme="%s"\n' "$id" > "$HOME/.config/hype/hype.conf"
+
+  if [[ -d "$target/wallpapers" ]]; then
+    wallpaper="$(find "$target/wallpapers" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | sort | head -n1 || true)"
+    if [[ -n "${wallpaper:-}" ]]; then
+      ln -sfn "$wallpaper" "$target/wall.set"
+    fi
+  fi
+
+  mode="dark"
+  if [[ -f "$HOME/.config/hype/config/configuration.json" ]]; then
+    mode="$(jq -r '.appearance.theme // "dark"' "$HOME/.config/hype/config/configuration.json" 2>/dev/null || printf 'dark')"
+  fi
+  [[ "$mode" == "light" || "$mode" == "dark" ]] || mode="dark"
+
+  if [[ -f "$HOME/.config/quickshell/hype-shell/scripts/interface/switchTheme.sh" ]]; then
+    bash "$HOME/.config/quickshell/hype-shell/scripts/interface/switchTheme.sh" "$id" "$mode" >/dev/null 2>&1 || true
+  fi
+
+  if command -v hype >/dev/null 2>&1; then
+    hype ipc call global setHypeTheme "$id" >/dev/null 2>&1 || true
+    hype ipc call global syncHypeBackground >/dev/null 2>&1 || true
+  fi
+
+  echo "applied HYPETHEME/$id"
 }
 
 uninstall_entry() {
@@ -218,6 +284,10 @@ case "$action" in
   install)
     [[ -n "$kind" && -n "$id" ]] || { usage; exit 1; }
     install_entry "$kind" "$id"
+    ;;
+  apply)
+    [[ "$(kind_key "$kind")" == "HYPETHEME" && -n "$id" ]] || { usage; exit 1; }
+    apply_theme "$id"
     ;;
   uninstall|remove)
     [[ -n "$kind" && -n "$id" ]] || { usage; exit 1; }

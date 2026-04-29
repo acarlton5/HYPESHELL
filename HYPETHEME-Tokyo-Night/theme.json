@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#7aa2f7"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Tokyo Night",
+    "id":  "tokyo-night"
+}

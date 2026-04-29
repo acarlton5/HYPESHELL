@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#ff7edb"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Synth Wave",
+    "id":  "synth-wave"
+}

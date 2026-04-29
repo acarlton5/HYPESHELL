@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#c4a7e7"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Rose Pine",
+    "id":  "rose-pine"
+}

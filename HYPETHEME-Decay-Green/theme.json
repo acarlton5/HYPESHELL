@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#95d5b2"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Decay Green",
+    "id":  "decay-green"
+}

@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#a7c7e7"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Frosted Glass",
+    "id":  "frosted-glass"
+}

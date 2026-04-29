@@ -143,8 +143,11 @@ Item {
         if (!item || actionProcess.running)
             return
 
-        const action = item.installed ? "uninstall" : "install"
-        root.statusText = (item.installed ? "Removing " : "Installing ") + (item.name || item.id)
+        const isTheme = item.packageType === "HYPETHEME"
+        const action = isTheme && item.installed ? "apply" : (item.installed ? "uninstall" : "install")
+        root.statusText = action === "apply"
+            ? "Applying " + (item.name || item.id)
+            : (item.installed ? "Removing " : "Installing ") + (item.name || item.id)
         actionProcess.command = [
             "bash",
             Directories.scriptsPath + "/store/hype-store.sh",
@@ -342,10 +345,14 @@ Item {
 
                         StyledButton {
                             Layout.preferredWidth: 132
-                            text: root.featuredItem.installed ? "Installed" : "Get"
-                            icon: root.featuredItem.installed ? "check" : "download"
+                            text: root.featuredItem.packageType === "HYPETHEME" && root.featuredItem.installed
+                                ? "Apply"
+                                : (root.featuredItem.installed ? "Installed" : "Get")
+                            icon: root.featuredItem.packageType === "HYPETHEME" && root.featuredItem.installed
+                                ? "palette"
+                                : (root.featuredItem.installed ? "check" : "download")
                             secondary: root.featuredItem.installed
-                            enabled: !root.featuredItem.installed && !root.busy
+                            enabled: (root.featuredItem.packageType === "HYPETHEME" || !root.featuredItem.installed) && !root.busy
                             onClicked: root.runPackageAction(root.featuredItem)
                         }
                     }
@@ -550,8 +557,12 @@ Item {
 
                     StyledButton {
                         Layout.preferredWidth: 116
-                        text: itemData.installed ? "Remove" : "Install"
-                        icon: itemData.installed ? "delete" : "download"
+                        text: itemData.packageType === "HYPETHEME" && itemData.installed
+                            ? "Apply"
+                            : (itemData.installed ? "Remove" : "Install")
+                        icon: itemData.packageType === "HYPETHEME" && itemData.installed
+                            ? "palette"
+                            : (itemData.installed ? "delete" : "download")
                         secondary: itemData.installed
                         enabled: !root.busy
                         onClicked: root.runPackageAction(itemData)

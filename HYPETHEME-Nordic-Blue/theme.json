@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#88c0d0"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Nordic Blue",
+    "id":  "nordic-blue"
+}

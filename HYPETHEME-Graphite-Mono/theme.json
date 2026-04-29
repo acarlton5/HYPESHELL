@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#b8b8b8"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Graphite Mono",
+    "id":  "graphite-mono"
+}

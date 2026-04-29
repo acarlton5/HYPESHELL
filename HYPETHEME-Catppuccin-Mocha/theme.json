@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#cba6f7"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Catppuccin",
+    "id":  "catppuccin"
+}

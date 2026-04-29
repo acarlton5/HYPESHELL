@@ -1,0 +1,10 @@
+{
+    "appearanceOverrides":  {
+                                "m3primary":  "#ffb7c5"
+                            },
+    "configOverrides":  {
+
+                        },
+    "name":  "Material Sakura",
+    "id":  "material-sakura"
+}
