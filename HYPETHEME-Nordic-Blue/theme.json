@@ -1,10 +1,35 @@
 {
-    "appearanceOverrides":  {
-                                "m3primary":  "#88c0d0"
-                            },
-    "configOverrides":  {
-
-                        },
+    "id":  "nordic-blue",
     "name":  "Nordic Blue",
-    "id":  "nordic-blue"
+    "configOverrides":  {
+                            "bar.modules.paddingColor":  "#2e3a4f",
+                            "bar.modules.radius":  18,
+                            "bar.radius":  34,
+                            "bar.merged":  true
+                        },
+    "appearanceOverrides":  {
+                                "m3background":  "#111827",
+                                "m3surface":  "#111827",
+                                "m3surfaceContainerLowest":  "#0e1420",
+                                "m3surfaceContainerLow":  "#18202f",
+                                "m3surfaceContainer":  "#1b2433",
+                                "m3surfaceContainerHigh":  "#2e3a4f",
+                                "m3surfaceContainerHighest":  "#3f4a5d",
+                                "m3surfaceVariant":  "#273245",
+                                "m3onBackground":  "#eef7f0",
+                                "m3onSurface":  "#eef7f0",
+                                "m3onSurfaceVariant":  "#c3cec5",
+                                "m3primary":  "#88c0d0",
+                                "m3onPrimary":  "#07120d",
+                                "m3primaryContainer":  "#4c6a7a",
+                                "m3onPrimaryContainer":  "#eef7f0",
+                                "m3secondary":  "#81a1c1",
+                                "m3secondaryContainer":  "#495c73",
+                                "m3onSecondaryContainer":  "#eef7f0",
+                                "m3tertiary":  "#b48ead",
+                                "m3tertiaryContainer":  "#60546a",
+                                "m3outline":  "#8d998f",
+                                "m3outlineVariant":  "#435148",
+                                "m3surfaceTint":  "#88c0d0"
+                            }
 }

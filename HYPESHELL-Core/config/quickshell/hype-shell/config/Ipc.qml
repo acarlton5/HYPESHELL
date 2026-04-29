@@ -117,6 +117,8 @@ Scope {
                 // Keep raw value if decoding fails.
             }
             WallpaperSlideshow.setTheme(nextTheme)
+            ThemeOverrides.refreshOverrides()
+            syncHypeBackground()
         }
 
         function peekMediaWidget(durationMs: int) {

@@ -1,10 +1,35 @@
 {
-    "appearanceOverrides":  {
-                                "m3primary":  "#b8b8b8"
-                            },
-    "configOverrides":  {
-
-                        },
+    "id":  "graphite-mono",
     "name":  "Graphite Mono",
-    "id":  "graphite-mono"
+    "configOverrides":  {
+                            "bar.modules.paddingColor":  "#363636",
+                            "bar.modules.radius":  18,
+                            "bar.radius":  34,
+                            "bar.merged":  true
+                        },
+    "appearanceOverrides":  {
+                                "m3background":  "#101010",
+                                "m3surface":  "#101010",
+                                "m3surfaceContainerLowest":  "#0d0d0d",
+                                "m3surfaceContainerLow":  "#181818",
+                                "m3surfaceContainer":  "#1c1c1c",
+                                "m3surfaceContainerHigh":  "#363636",
+                                "m3surfaceContainerHighest":  "#464646",
+                                "m3surfaceVariant":  "#2c2c2c",
+                                "m3onBackground":  "#eef7f0",
+                                "m3onSurface":  "#eef7f0",
+                                "m3onSurfaceVariant":  "#c3cec5",
+                                "m3primary":  "#d6d6d6",
+                                "m3onPrimary":  "#07120d",
+                                "m3primaryContainer":  "#707070",
+                                "m3onPrimaryContainer":  "#eef7f0",
+                                "m3secondary":  "#a8a8a8",
+                                "m3secondaryContainer":  "#5b5b5b",
+                                "m3onSecondaryContainer":  "#eef7f0",
+                                "m3tertiary":  "#f2f2f2",
+                                "m3tertiaryContainer":  "#7c7c7c",
+                                "m3outline":  "#8d998f",
+                                "m3outlineVariant":  "#435148",
+                                "m3surfaceTint":  "#d6d6d6"
+                            }
 }

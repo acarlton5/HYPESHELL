@@ -14,6 +14,8 @@ Item {
     property string statusText: ""
     property bool loading: false
     property bool busy: catalogProcess.running || actionProcess.running
+    property bool pendingThemeAction: false
+    property string pendingThemeId: ""
     property var catalog: []
     readonly property var fallbackFeatured: ({
         id: "hype-default",
@@ -144,9 +146,11 @@ Item {
             return
 
         const isTheme = item.packageType === "HYPETHEME"
-        const action = isTheme && item.installed ? "apply" : (item.installed ? "uninstall" : "install")
-        root.statusText = action === "apply"
-            ? "Applying " + (item.name || item.id)
+        const action = isTheme ? "install" : (item.installed ? "uninstall" : "install")
+        root.pendingThemeAction = isTheme && (action === "apply" || action === "install")
+        root.pendingThemeId = root.pendingThemeAction ? item.id : ""
+        root.statusText = isTheme && item.installed
+            ? "Updating and applying " + (item.name || item.id)
             : (item.installed ? "Removing " : "Installing ") + (item.name || item.id)
         actionProcess.command = [
             "bash",
@@ -611,10 +615,17 @@ Item {
 
         onExited: (exitCode) => {
             if (exitCode === 0) {
+                if (root.pendingThemeAction && root.pendingThemeId.length > 0) {
+                    Quickshell.execDetached(["hype", "ipc", "call", "global", "setHypeTheme", root.pendingThemeId])
+                    Quickshell.execDetached(["hype", "ipc", "call", "global", "syncHypeBackground"])
+                    root.statusText = "Theme applied"
+                }
                 root.reloadCatalog()
             } else {
                 root.statusText = "Package action failed"
             }
+            root.pendingThemeAction = false
+            root.pendingThemeId = ""
         }
     }
 }

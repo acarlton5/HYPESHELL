@@ -1,10 +1,35 @@
 {
-    "appearanceOverrides":  {
-                                "m3primary":  "#a7c7e7"
-                            },
-    "configOverrides":  {
-
-                        },
+    "id":  "frosted-glass",
     "name":  "Frosted Glass",
-    "id":  "frosted-glass"
+    "configOverrides":  {
+                            "bar.modules.paddingColor":  "#33465b",
+                            "bar.modules.radius":  18,
+                            "bar.radius":  34,
+                            "bar.merged":  true
+                        },
+    "appearanceOverrides":  {
+                                "m3background":  "#101824",
+                                "m3surface":  "#101824",
+                                "m3surfaceContainerLowest":  "#0d141e",
+                                "m3surfaceContainerLow":  "#172231",
+                                "m3surfaceContainer":  "#1b2838",
+                                "m3surfaceContainerHigh":  "#33465b",
+                                "m3surfaceContainerHighest":  "#435568",
+                                "m3surfaceVariant":  "#2a3a4d",
+                                "m3onBackground":  "#eef7f0",
+                                "m3onSurface":  "#eef7f0",
+                                "m3onSurfaceVariant":  "#c3cec5",
+                                "m3primary":  "#bde0fe",
+                                "m3onPrimary":  "#07120d",
+                                "m3primaryContainer":  "#647b91",
+                                "m3onPrimaryContainer":  "#eef7f0",
+                                "m3secondary":  "#cdb4db",
+                                "m3secondaryContainer":  "#6b6781",
+                                "m3onSecondaryContainer":  "#eef7f0",
+                                "m3tertiary":  "#ffc8dd",
+                                "m3tertiaryContainer":  "#827082",
+                                "m3outline":  "#8d998f",
+                                "m3outlineVariant":  "#435148",
+                                "m3surfaceTint":  "#bde0fe"
+                            }
 }

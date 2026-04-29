@@ -1,10 +1,35 @@
 {
-    "appearanceOverrides":  {
-                                "m3primary":  "#fabd2f"
-                            },
-    "configOverrides":  {
-
-                        },
+    "id":  "gruvbox-retro",
     "name":  "Gruvbox Retro",
-    "id":  "gruvbox-retro"
+    "configOverrides":  {
+                            "bar.modules.paddingColor":  "#3c3836",
+                            "bar.modules.radius":  18,
+                            "bar.radius":  34,
+                            "bar.merged":  true
+                        },
+    "appearanceOverrides":  {
+                                "m3background":  "#1d2021",
+                                "m3surface":  "#1d2021",
+                                "m3surfaceContainerLowest":  "#181a1b",
+                                "m3surfaceContainerLow":  "#242526",
+                                "m3surfaceContainer":  "#282828",
+                                "m3surfaceContainerHigh":  "#3c3836",
+                                "m3surfaceContainerHighest":  "#4c4846",
+                                "m3surfaceVariant":  "#343231",
+                                "m3onBackground":  "#eef7f0",
+                                "m3onSurface":  "#eef7f0",
+                                "m3onSurfaceVariant":  "#c3cec5",
+                                "m3primary":  "#fabd2f",
+                                "m3onPrimary":  "#07120d",
+                                "m3primaryContainer":  "#866b2b",
+                                "m3onPrimaryContainer":  "#eef7f0",
+                                "m3secondary":  "#b8bb26",
+                                "m3secondaryContainer":  "#696a27",
+                                "m3onSecondaryContainer":  "#eef7f0",
+                                "m3tertiary":  "#fe8019",
+                                "m3tertiaryContainer":  "#885021",
+                                "m3outline":  "#8d998f",
+                                "m3outlineVariant":  "#435148",
+                                "m3surfaceTint":  "#fabd2f"
+                            }
 }

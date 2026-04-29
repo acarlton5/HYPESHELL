@@ -232,7 +232,10 @@ apply_theme() {
   printf 'hypeTheme="%s"\n' "$id" > "$HOME/.config/hype/hype.conf"
 
   if [[ -d "$target/wallpapers" ]]; then
-    wallpaper="$(find "$target/wallpapers" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | sort | head -n1 || true)"
+    wallpaper="$(find "$target/wallpapers" -maxdepth 1 -type f \( -iname 'default.jpg' -o -iname 'default.jpeg' -o -iname 'default.png' -o -iname 'default.webp' \) | sort | head -n1 || true)"
+    if [[ -z "${wallpaper:-}" ]]; then
+      wallpaper="$(find "$target/wallpapers" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | sort | head -n1 || true)"
+    fi
     if [[ -n "${wallpaper:-}" ]]; then
       ln -sfn "$wallpaper" "$target/wall.set"
     fi

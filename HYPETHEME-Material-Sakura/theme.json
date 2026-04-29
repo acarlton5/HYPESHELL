@@ -1,10 +1,35 @@
 {
-    "appearanceOverrides":  {
-                                "m3primary":  "#ffb7c5"
-                            },
-    "configOverrides":  {
-
-                        },
+    "id":  "material-sakura",
     "name":  "Material Sakura",
-    "id":  "material-sakura"
+    "configOverrides":  {
+                            "bar.modules.paddingColor":  "#4a2b38",
+                            "bar.modules.radius":  18,
+                            "bar.radius":  34,
+                            "bar.merged":  true
+                        },
+    "appearanceOverrides":  {
+                                "m3background":  "#1f1218",
+                                "m3surface":  "#1f1218",
+                                "m3surfaceContainerLowest":  "#190f14",
+                                "m3surfaceContainerLow":  "#27171e",
+                                "m3surfaceContainer":  "#2b1a22",
+                                "m3surfaceContainerHigh":  "#4a2b38",
+                                "m3surfaceContainerHighest":  "#583c48",
+                                "m3surfaceVariant":  "#3f2530",
+                                "m3onBackground":  "#eef7f0",
+                                "m3onSurface":  "#eef7f0",
+                                "m3onSurfaceVariant":  "#c3cec5",
+                                "m3primary":  "#ffafcc",
+                                "m3onPrimary":  "#07120d",
+                                "m3primaryContainer":  "#8a5d6e",
+                                "m3onPrimaryContainer":  "#eef7f0",
+                                "m3secondary":  "#bde0fe",
+                                "m3secondaryContainer":  "#6d7385",
+                                "m3onSecondaryContainer":  "#eef7f0",
+                                "m3tertiary":  "#cdb4db",
+                                "m3tertiaryContainer":  "#745f75",
+                                "m3outline":  "#8d998f",
+                                "m3outlineVariant":  "#435148",
+                                "m3surfaceTint":  "#ffafcc"
+                            }
 }

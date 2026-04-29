@@ -13,6 +13,36 @@ Item {
     anchors.fill: parent
     property string wallpaperFolder: "file://" + Quickshell.env("HOME") + "/Pictures"
 
+    function refreshWallpaperFolder() {
+        const themeFolder = String(WallpaperSlideshow.themeWallpaperFolder || "").trim()
+        if (themeFolder.length > 0) {
+            root.setWallpaperFolder(themeFolder)
+            return
+        }
+
+        if (!readHypeThemeProc.running)
+            readHypeThemeProc.running = true
+    }
+
+    onVisibleChanged: {
+        if (visible)
+            refreshWallpaperFolder()
+    }
+
+    Component.onCompleted: refreshWallpaperFolder()
+
+    Connections {
+        target: WallpaperSlideshow
+
+        function onHypeThemeNameChanged() {
+            root.refreshWallpaperFolder()
+        }
+
+        function onThemeWallpaperFolderChanged() {
+            root.refreshWallpaperFolder()
+        }
+    }
+
     Flickable {
         anchors.fill: parent
         contentHeight: contentLayout.implicitHeight + 100
@@ -158,7 +188,7 @@ Item {
     Process {
         id: readHypeThemeProc
         command: ["bash", "-lc", "theme=$(sed -nE 's/^[[:space:]]*hypeTheme[[:space:]]*=[[:space:]]*\"?([^\"[:space:]]+)\"?.*$/\\1/p' \"$HOME/.config/hype/hype.conf\" | head -n1); theme_dir=\"$HOME/.config/hype/themes/$theme/wallpapers\"; if [ -n \"$theme\" ] && [ -d \"$theme_dir\" ]; then printf '%s' \"$theme_dir\"; else printf '%s' \"$HOME/Pictures\"; fi"]
-        running: true
+        running: false
         stdout: StdioCollector {
             onStreamFinished: {
                 root.setWallpaperFolder(text)

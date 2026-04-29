@@ -1,10 +1,35 @@
 {
-    "appearanceOverrides":  {
-                                "m3primary":  "#c4a7e7"
-                            },
-    "configOverrides":  {
-
-                        },
+    "id":  "rose-pine",
     "name":  "Rose Pine",
-    "id":  "rose-pine"
+    "configOverrides":  {
+                            "bar.modules.paddingColor":  "#26233a",
+                            "bar.modules.radius":  18,
+                            "bar.radius":  34,
+                            "bar.merged":  true
+                        },
+    "appearanceOverrides":  {
+                                "m3background":  "#191724",
+                                "m3surface":  "#191724",
+                                "m3surfaceContainerLowest":  "#14131e",
+                                "m3surfaceContainerLow":  "#1d1b2a",
+                                "m3surfaceContainer":  "#1f1d2e",
+                                "m3surfaceContainerHigh":  "#26233a",
+                                "m3surfaceContainerHighest":  "#37354a",
+                                "m3surfaceVariant":  "#232034",
+                                "m3onBackground":  "#eef7f0",
+                                "m3onSurface":  "#eef7f0",
+                                "m3onSurfaceVariant":  "#c3cec5",
+                                "m3primary":  "#ebbcba",
+                                "m3onPrimary":  "#07120d",
+                                "m3primaryContainer":  "#7b656d",
+                                "m3onPrimaryContainer":  "#eef7f0",
+                                "m3secondary":  "#9ccfd8",
+                                "m3secondaryContainer":  "#576d7a",
+                                "m3onSecondaryContainer":  "#eef7f0",
+                                "m3tertiary":  "#f6c177",
+                                "m3tertiaryContainer":  "#80674f",
+                                "m3outline":  "#8d998f",
+                                "m3outlineVariant":  "#435148",
+                                "m3surfaceTint":  "#ebbcba"
+                            }
 }
