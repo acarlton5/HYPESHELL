@@ -1368,7 +1368,7 @@ deploy_configs() {
     print_status "Deploying default gadgets..."
     local gadgets_src="$SCRIPT_DIR/HYPEGADGET-Clock"
     local gadgets_dst="$DATA_HOME/hypeshell/gadgets/clock"
-    
+
     if [[ -d "$gadgets_src" ]]; then
         mkdir -p "$gadgets_dst"
         cp -r "$gadgets_src/"* "$gadgets_dst/"
