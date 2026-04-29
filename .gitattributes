@@ -2,6 +2,7 @@
 .gitattributes text eol=lf
 
 *.sh text eol=lf
+HYPESHELL-Core/bin/* text eol=lf
 install.sh text eol=lf
 *.bash text eol=lf
 *.zsh text eol=lf
