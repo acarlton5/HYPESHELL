@@ -10,6 +10,7 @@ Singleton {
 
     property var overrides: ({})
     property string themeName: WallpaperSlideshow.hypeThemeName
+    property string themeMode: Config.runtime.appearance.theme
     readonly property var appearanceKeyMap: ({
         m3background: "background",
         m3error: "error",
@@ -52,6 +53,10 @@ Singleton {
     })
     
     onThemeNameChanged: refreshOverrides()
+    onThemeModeChanged: {
+        applyConfigOverrides(activeConfigOverrides(overrides))
+        applyAppearanceOverrides(activeAppearanceOverrides(overrides))
+    }
     Component.onCompleted: refreshOverrides()
 
     function refreshOverrides() {
@@ -74,8 +79,8 @@ Singleton {
                     const data = JSON.parse(text)
                     root.overrides = data
                     console.log("Theme overrides loaded for:", root.themeName)
-                    applyConfigOverrides(data.configOverrides || {})
-                    applyAppearanceOverrides(data.appearanceOverrides || {})
+                    applyConfigOverrides(activeConfigOverrides(data))
+                    applyAppearanceOverrides(activeAppearanceOverrides(data))
                 } catch (e) {
                     root.overrides = {}
                 }
@@ -91,6 +96,30 @@ Singleton {
         for (let key in cfg) {
             setRuntimeValue(key, cfg[key])
         }
+    }
+
+    function activeAppearanceOverrides(data) {
+        if (!data)
+            return {}
+
+        const mode = String(themeMode || "dark").toLowerCase()
+        if (mode === "light" && data.appearanceOverridesLight)
+            return data.appearanceOverridesLight
+        if (mode === "dark" && data.appearanceOverridesDark)
+            return data.appearanceOverridesDark
+        return data.appearanceOverrides || {}
+    }
+
+    function activeConfigOverrides(data) {
+        if (!data)
+            return {}
+
+        const mode = String(themeMode || "dark").toLowerCase()
+        if (mode === "light" && data.configOverridesLight)
+            return data.configOverridesLight
+        if (mode === "dark" && data.configOverridesDark)
+            return data.configOverridesDark
+        return data.configOverrides || {}
     }
 
     function setRuntimeValue(nestedKey, value) {

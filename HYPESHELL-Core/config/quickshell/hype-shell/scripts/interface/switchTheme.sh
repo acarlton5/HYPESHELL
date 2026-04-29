@@ -40,6 +40,7 @@ THEME_NAME="${1:-}"
 MODE="${2:-dark}"  # light or dark mode
 
 THEME_DIR="$HOME/.config/hype/colorschemes"
+SHELL_THEME_DIR="$HOME/.config/quickshell/hype-shell/colorschemes"
 TARGET="$HOME/.config/hype/config/colors.json"
 
 if [[ -z "$THEME_NAME" ]]; then
@@ -128,6 +129,9 @@ fi
 
 # === FALLBACK TO LEGACY COLORSCHEMES ===
 SOURCE="$THEME_DIR/$THEME_NAME.json"
+if [[ ! -f "$SOURCE" && -f "$SHELL_THEME_DIR/$THEME_NAME.json" ]]; then
+  SOURCE="$SHELL_THEME_DIR/$THEME_NAME.json"
+fi
 
 if [[ ! -f "$SOURCE" ]]; then
   echo "Theme not found: $THEME_NAME"
