@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+# =============================================================================
+# DSS DAEMON MANAGER
+# Handles installation, status, and control of the DSS backend services.
+# =============================================================================
+
+DAEMON_BIN="/usr/local/bin/multica"
+SERVICE_NAME="dss-systems-daemon"
+DAEMON_PROFILE="systems"
+
+# Colors
+CLR_OK="\033[1;32m"
+CLR_ERR="\033[1;31m"
+CLR_INFO="\033[1;34m"
+CLR_RESET="\033[0m"
+
+log_info() { echo -e "${CLR_INFO}[DSS]${CLR_RESET} $1"; }
+log_ok()   { echo -e "${CLR_OK}[OK]${CLR_RESET} $1"; }
+log_err()  { echo -e "${CLR_ERR}[ERR]${CLR_RESET} $1"; }
+
+check_daemon() {
+    if command -v multica &>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+install_daemon() {
+    log_info "Bootstrapping DSS Daemon (multica)..."
+    # Placeholder for actual download/build logic
+    # In a real scenario, this would curl the binary or clone/build
+    log_info "Simulating multica installation..."
+    sudo touch "$DAEMON_BIN" && sudo chmod +x "$DAEMON_BIN"
+    log_ok "Daemon binary installed to $DAEMON_BIN"
+}
+
+setup_service() {
+    log_info "Configuring systemd service..."
+    cat <<EOF | sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null
+[Unit]
+Description=DSS Systems Daemon
+After=network.target
+
+[Service]
+ExecStart=${DAEMON_BIN} daemon start --foreground --profile ${DAEMON_PROFILE}
+Restart=always
+User=$USER
+Environment=HOME=$HOME
+
+[Install]
+WantedBy=default.target
+EOF
+    sudo systemctl daemon-reload
+    sudo systemctl enable ${SERVICE_NAME}
+    log_ok "Service ${SERVICE_NAME} enabled."
+}
+
+# --- COMMANDS ---
+case "$1" in
+    status)
+        if check_daemon; then
+            multica daemon status --profile ${DAEMON_PROFILE}
+        else
+            log_err "Daemon not installed."
+            exit 1
+        fi
+        ;;
+    install)
+        if ! check_daemon; then
+            install_daemon
+        fi
+        setup_service
+        ;;
+    start)
+        sudo systemctl start ${SERVICE_NAME}
+        log_ok "Service started."
+        ;;
+    stop)
+        sudo systemctl stop ${SERVICE_NAME}
+        log_info "Service stopped."
+        ;;
+    *)
+        echo "Usage: dss-daemon {status|install|start|stop}"
+        exit 1
+        ;;
+esac

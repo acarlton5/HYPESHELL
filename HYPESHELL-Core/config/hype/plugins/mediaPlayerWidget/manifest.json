@@ -1,0 +1,28 @@
+{
+  "id": "mediaPlayerWidget",
+  "name": "Media Player Widget",
+  "version": "0.2.0",
+  "author": "tanujairamv",
+  "type": "desktop-gadget",
+  "description": "A simple media player desktop widget.",
+  "settingsQml": "Settings.qml",
+  "enabledKey": "plugins.mediaPlayerWidget.enabled",
+  "requires_hype": ">=0.4.1",
+  "settings": [
+    {
+      "key": "plugins.mediaPlayerWidget.enabled",
+      "type": "boolean",
+      "label": "Enabled",
+      "description": "Show or hide the media player desktop widget."
+    },
+    {
+      "key": "plugins.mediaPlayerWidget.peekDurationMs",
+      "type": "number",
+      "label": "Peek Duration (ms)",
+      "description": "How long the widget stays above windows when peeking.",
+      "step": 250,
+      "min": 500,
+      "max": 60000
+    }
+  ]
+}

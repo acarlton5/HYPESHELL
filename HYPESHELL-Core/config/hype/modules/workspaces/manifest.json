@@ -1,0 +1,38 @@
+{
+  "id": "workspaces",
+  "name": "Workspaces",
+  "version": "1.0.0",
+  "author": "HypeShell Core",
+  "type": "module",
+  "description": "The workspace switcher and window manager status.",
+  "enabledKey": "bar.modules.workspaces.enabled",
+  "settings": [
+    {
+      "key": "bar.modules.workspaces.enabled",
+      "type": "boolean",
+      "label": "Enabled",
+      "description": "Show the workspace switcher in the bar."
+    },
+    {
+      "key": "bar.modules.workspaces.workspaceIndicators",
+      "type": "number",
+      "label": "Indicator Count",
+      "description": "Number of workspace dots to show.",
+      "min": 1,
+      "max": 20,
+      "step": 1
+    },
+    {
+      "key": "bar.modules.workspaces.showAppIcons",
+      "type": "boolean",
+      "label": "Show App Icons",
+      "description": "Show icons of open windows on the workspace dots."
+    },
+    {
+      "key": "bar.modules.workspaces.showJapaneseNumbers",
+      "type": "boolean",
+      "label": "Japanese Numbers",
+      "description": "Use Japanese kanji for workspace numbers."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "id": "official",
+      "name": "HYPESHELL HypeStore",
+      "url": "https://raw.githubusercontent.com/acarlton5/HYPESHELL/main/HYPESHELL-HYPESTORE/index.json"
+    }
+  ]
+}

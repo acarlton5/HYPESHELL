@@ -1,0 +1,19 @@
+{
+  "id": "developerMode",
+  "name": "Developer Mode",
+  "version": "0.1.0",
+  "author": "morph",
+  "type": "shell-module",
+  "description": "USB Docker developer workflow panel and launcher card.",
+  "enabledKey": "modules.developerMode.enabled",
+  "entryQml": "DevSidebar.qml",
+  "launcherQml": "DevUsbLauncher.qml",
+  "settings": [
+    {
+      "key": "modules.developerMode.enabled",
+      "type": "boolean",
+      "label": "Enabled",
+      "description": "Enable Developer Mode launcher tile and panel."
+    }
+  ]
+}

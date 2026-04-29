@@ -1,0 +1,75 @@
+{
+  "id": "clockWidget",
+  "name": "CLOCK",
+  "version": "0.0.1",
+  "author": "morph",
+  "type": "desktop-gadget",
+  "description": "Desktop clock gadget for Hype Shell",
+  "settingsQml": "Settings.qml",
+  "enabledKey": "appearance.background.clock.enabled",
+  "settings": [
+    {
+      "key": "appearance.background.clock.isAnalog",
+      "type": "boolean",
+      "label": "Analog Mode",
+      "description": "Use analog mode. Disable for digital mode."
+    },
+    {
+      "key": "appearance.background.clock.edgeSpacing",
+      "type": "number",
+      "label": "Edge Spacing",
+      "description": "Padding from display edges.",
+      "step": 5,
+      "min": 0,
+      "max": 500
+    },
+    {
+      "key": "appearance.background.clock.rotatePolygonBg",
+      "type": "boolean",
+      "label": "Rotate Polygon",
+      "description": "Rotate the analog polygon background."
+    },
+    {
+      "key": "appearance.background.clock.rotationDuration",
+      "type": "number",
+      "label": "Rotation Duration",
+      "description": "Seconds for one full polygon rotation.",
+      "step": 1,
+      "min": 1,
+      "max": 120
+    },
+    {
+      "key": "appearance.background.clock.shape",
+      "type": "enum",
+      "label": "Clock Shape",
+      "description": "Pick the analog polygon shape.",
+      "default": 1,
+      "options": [
+        {
+          "label": "Cookie 7 Sided",
+          "value": 0
+        },
+        {
+          "label": "Cookie 9 Sided",
+          "value": 1
+        },
+        {
+          "label": "Cookie 12 Sided",
+          "value": 2
+        },
+        {
+          "label": "Pixel Circle",
+          "value": 3
+        },
+        {
+          "label": "Circle",
+          "value": 4
+        },
+        {
+          "label": "Ghostish",
+          "value": 5
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "dss-systems",
+  "name": "DSS Systems Workspace",
+  "version": "1.0.0",
+  "author": "morph",
+  "type": "shell-module",
+  "description": "DSS workspace integration — repo context, bridge actions, and live notifications in the left sidebar.",
+  "enabledKey": "modules['dss-systems'].enabled",
+  "entryQml": "DssSidebar.qml",
+  "launcherQml": "DssLauncher.qml",
+  "settings": [
+    {
+      "key": "modules['dss-systems'].enabled",
+      "type": "boolean",
+      "label": "Enabled",
+      "description": "Enable DSS Systems workspace module."
+    }
+  ]
+}

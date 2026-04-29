@@ -1,0 +1,10 @@
+{
+  "configOverrides": {
+    "bar.modules.workspaces.showJapaneseNumbers": false,
+    "bar.floating": false,
+    "bar.radius": 12
+  },
+  "appearanceOverrides": {
+    "m3primary": "#ca9ee6"
+  }
+}

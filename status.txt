@@ -1,0 +1,25 @@
+[OK] qt6-positioning already installed. Skipping.
+[OK] qt6-sensors already installed. Skipping.
+[OK] qt6-5compat already installed. Skipping.
+[OK] qt5-quickcontrols2 already installed. Skipping.
+[OK] qt5-graphicaleffects already installed. Skipping.
+[OK] All requested pacman packages already installed or unavailable.
+[STATUS] Installing exact AUR package: quickshell-git
+Cloning into '/tmp/tmp.J4bq7E8rYS'...
+remote: Enumerating objects: 70, done.
+remote: Counting objects: 100% (70/70), done.
+remote: Compressing objects: 100% (65/65), done.
+remote: Total 70 (delta 4), reused 70 (delta 4), pack-reused 0 (from 0)
+Receiving objects: 100% (70/70), 22.47 KiB | 73.00 KiB/s, done.
+Resolving deltas: 100% (4/4), done.
+==> Making package: quickshell-git 0.2.0.r1.g783b971-1 (Sat 25 Apr 2026 10:42:34 AM MDT)
+==> Checking runtime dependencies...
+==> Installing missing dependencies...
+[sudo] password for morph: 
+error: target not found: cpptrace
+==> ERROR: 'pacman' failed to install missing dependencies.
+==> Missing dependencies:
+  -> jemalloc
+  -> cpptrace
+  -> vulkan-headers
+==> ERROR: Could not resolve all dependencies.

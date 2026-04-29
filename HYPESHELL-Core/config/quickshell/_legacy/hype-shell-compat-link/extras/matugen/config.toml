@@ -1,0 +1,6 @@
+[config] 
+reload = false 
+
+[templates.hype]
+input_path = './templates/colors.json'
+output_path = '~/.config/hype/config/colors.json'
