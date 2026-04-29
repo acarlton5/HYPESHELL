@@ -125,7 +125,7 @@ Scope {
                 height: Math.max(360, Math.min(parent.height - Metrics.margin("verylarge"), 720))
                 x: Math.max(0, (parent.width - width) / 2)
                 y: Math.max(0, (parent.height - height) / 2)
-                color: Appearance.m3colors.m3background
+                color: MaterialColors.colors.background
                 opacity: 1.0
                 radius: Appearance.rounding.large
 
@@ -157,7 +157,7 @@ Scope {
                     Rectangle {
                         Layout.fillHeight: true
                         Layout.preferredWidth: root.sidebarCollapsed ? 80 : 300
-                        color: Appearance.m3colors.m3surfaceContainerLow
+                        color: MaterialColors.colors.surface_container_low
                         
                         Behavior on Layout.preferredWidth {
                             NumberAnimation { duration: 250; easing.type: Easing.InOutCubic }
@@ -216,7 +216,7 @@ Scope {
                                         anchors.fill: parent
                                         anchors.margins: 4
                                         visible: !modelData.header
-                                        color: root.selectedIndex === modelData.page ? Appearance.m3colors.m3secondaryContainer : "transparent"
+                                        color: root.selectedIndex === modelData.page ? MaterialColors.colors.secondary_container : "transparent"
                                         radius: 12
 
                                         RowLayout {
@@ -226,12 +226,12 @@ Scope {
                                             MaterialSymbol {
                                                 icon: modelData.icon || ""
                                                 iconSize: 22
-                                                color: root.selectedIndex === modelData.page ? Appearance.m3colors.m3onSecondaryContainer : Appearance.m3colors.m3onSurface
+                                                color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
                                             }
                                             StyledText {
                                                 text: modelData.label
                                                 visible: !root.sidebarCollapsed
-                                                color: root.selectedIndex === modelData.page ? Appearance.m3colors.m3onSecondaryContainer : Appearance.m3colors.m3onSurface
+                                                color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
                                                 font.weight: root.selectedIndex === modelData.page ? Font.Bold : Font.Normal
                                             }
                                         }
@@ -263,7 +263,7 @@ Scope {
                         Rectangle {
                             anchors.fill: parent
                             visible: root.selectedPage().label === "Theme Settings" && settingsPage.hasError
-                            color: Appearance.m3colors.m3background
+                            color: MaterialColors.colors.background
                             ColumnLayout {
                                 anchors.centerIn: parent
                                 spacing: 12

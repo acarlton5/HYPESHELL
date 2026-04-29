@@ -4,14 +4,10 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.config
-import qs.modules.functions
 import qs.modules.components
 
-ContentMenu {
+Item {
     id: root
-
-    title: "HypeStore"
-    description: "Discover themes, gadgets, and shell modules for your desktop."
 
     property string searchQuery: ""
     property string currentCategory: "all"
@@ -74,22 +70,22 @@ ContentMenu {
 
     function tintForType(typeName) {
         if (typeName === "HYPETHEME")
-            return Appearance.m3colors.m3primaryContainer
+            return MaterialColors.colors.primary_container
         if (typeName === "HYPEGADGET")
-            return Appearance.m3colors.m3tertiaryContainer
+            return MaterialColors.colors.tertiary_container
         if (typeName === "HYPEMODULE")
-            return Appearance.m3colors.m3secondaryContainer
-        return Appearance.m3colors.m3surfaceContainerHighest
+            return MaterialColors.colors.secondary_container
+        return MaterialColors.colors.surface_container_highest
     }
 
     function onTintForType(typeName) {
         if (typeName === "HYPETHEME")
-            return Appearance.m3colors.m3onPrimaryContainer
+            return MaterialColors.colors.on_primary_container
         if (typeName === "HYPEGADGET")
-            return Appearance.m3colors.m3onTertiaryContainer
+            return MaterialColors.colors.on_tertiary_container
         if (typeName === "HYPEMODULE")
-            return Appearance.m3colors.m3onSecondaryContainer
-        return Appearance.m3colors.m3onSurface
+            return MaterialColors.colors.on_secondary_container
+        return MaterialColors.colors.on_surface
     }
 
     function filterCatalog() {
@@ -182,306 +178,384 @@ ContentMenu {
 
     Component.onCompleted: reloadCatalog()
 
-    ContentCard {
-        Layout.fillWidth: true
-        color: Appearance.m3colors.m3surfaceContainerLowest
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Metrics.margin("normal")
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Metrics.margin("normal")
-
-                StyledRect {
-                    Layout.preferredWidth: 72
-                    Layout.preferredHeight: 72
-                    radius: Metrics.radius("large")
-                    color: root.tintForType(root.featuredItem.packageType)
-
-                    MaterialSymbol {
-                        anchors.centerIn: parent
-                        icon: root.iconForType(root.featuredItem.packageType)
-                        iconSize: 34
-                        color: root.onTintForType(root.featuredItem.packageType)
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: Metrics.spacing(4)
-
-                    RowLayout {
-                        spacing: Metrics.spacing(8)
-
-                        StyledText {
-                            text: "Featured"
-                            font.pixelSize: Metrics.fontSize("small")
-                            color: Appearance.colors.colSubtext
-                        }
-
-                        StyledRect {
-                            Layout.preferredWidth: typeLabel.implicitWidth + 18
-                            Layout.preferredHeight: 24
-                            radius: 12
-                            color: Appearance.m3colors.m3surfaceContainerHigh
-
-                            StyledText {
-                                id: typeLabel
-                                anchors.centerIn: parent
-                                text: root.labelForType(root.featuredItem.packageType)
-                                font.pixelSize: Metrics.fontSize("smaller")
-                                color: Appearance.m3colors.m3onSurfaceVariant
-                            }
-                        }
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: root.featuredItem.name || "HypeStore"
-                        font.pixelSize: Metrics.fontSize("huge")
-                        font.bold: true
-                        elide: Text.ElideRight
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: root.featuredItem.description || "Browse installable packages for HypeShell."
-                        font.pixelSize: Metrics.fontSize("small")
-                        color: Appearance.colors.colSubtext
-                        wrapMode: Text.WordWrap
-                        maximumLineCount: 2
-                        elide: Text.ElideRight
-                    }
-                }
-
-                StyledButton {
-                    Layout.preferredWidth: 132
-                    text: root.featuredItem.installed ? "Installed" : "Get"
-                    icon: root.featuredItem.installed ? "check" : "download"
-                    secondary: root.featuredItem.installed
-                    enabled: !root.featuredItem.installed && !root.busy
-                    onClicked: root.runPackageAction(root.featuredItem)
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Metrics.spacing(10)
-
-                Repeater {
-                    model: [
-                        { label: "Catalog", value: root.catalog.length },
-                        { label: "Installed", value: root.installedCount() },
-                        { label: "Showing", value: root.filteredCatalog.length }
-                    ]
-
-                    StyledRect {
-                        Layout.preferredWidth: 150
-                        Layout.preferredHeight: 54
-                        radius: Metrics.radius("normal")
-                        color: Appearance.m3colors.m3surfaceContainer
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: Metrics.margin("small")
-
-                            StyledText {
-                                text: modelData.value
-                                font.pixelSize: Metrics.fontSize("larger")
-                                font.bold: true
-                            }
-
-                            StyledText {
-                                text: modelData.label
-                                font.pixelSize: Metrics.fontSize("small")
-                                color: Appearance.colors.colSubtext
-                            }
-                        }
-                    }
-                }
-
-                Item { Layout.fillWidth: true }
-
-                StyledButton {
-                    text: "Refresh"
-                    icon: "refresh"
-                    secondary: true
-                    enabled: !root.busy
-                    onClicked: root.reloadCatalog()
-                }
-            }
-        }
+    Rectangle {
+        anchors.fill: parent
+        color: MaterialColors.colors.background
+        radius: Appearance.rounding.large
     }
 
-    RowLayout {
-        Layout.fillWidth: true
-        spacing: Metrics.margin("small")
-
-        Repeater {
-            model: root.categories
-
-            StyledButton {
-                text: modelData.label + "  " + root.countForType(modelData.type)
-                icon: modelData.icon
-                secondary: root.currentCategory !== modelData.id
-                checked: root.currentCategory === modelData.id
-                onClicked: root.currentCategory = modelData.id
-            }
-        }
-
-        Item { Layout.fillWidth: true }
-    }
-
-    StyledTextField {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 52
-        icon: "search"
-        placeholder: "Search packages"
-        text: root.searchQuery
-        onTextChanged: root.searchQuery = text
-    }
-
-    StyledText {
-        Layout.fillWidth: true
-        text: root.statusText
-        visible: root.statusText.length > 0
-        color: Appearance.colors.colSubtext
-        font.pixelSize: Metrics.fontSize("small")
-    }
-
-    GridLayout {
-        Layout.fillWidth: true
-        columns: root.width > 860 ? 2 : 1
-        columnSpacing: Metrics.margin("normal")
-        rowSpacing: Metrics.margin("normal")
-
-        Repeater {
-            model: root.filteredCatalog
-
-            delegate: StyledRect {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 148
-                radius: Metrics.radius("normal")
-                color: Appearance.m3colors.m3surfaceContainerLow
-                border.color: Appearance.m3colors.m3outlineVariant
-                border.width: 1
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: Metrics.margin("normal")
-                    spacing: Metrics.margin("normal")
-
-                    StyledRect {
-                        Layout.preferredWidth: 58
-                        Layout.preferredHeight: 58
-                        Layout.alignment: Qt.AlignTop
-                        radius: Metrics.radius("normal")
-                        color: root.tintForType(modelData.packageType)
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            icon: root.iconForType(modelData.packageType)
-                            iconSize: 28
-                            color: root.onTintForType(modelData.packageType)
-                        }
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        spacing: Metrics.spacing(4)
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: Metrics.spacing(8)
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: modelData.name || modelData.id
-                                font.bold: true
-                                font.pixelSize: Metrics.fontSize("large")
-                                elide: Text.ElideRight
-                            }
-
-                            StyledText {
-                                text: modelData.version || ""
-                                visible: String(modelData.version || "").length > 0
-                                font.pixelSize: Metrics.fontSize("smaller")
-                                color: Appearance.colors.colSubtext
-                            }
-                        }
-
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: modelData.description || "No description provided."
-                            font.pixelSize: Metrics.fontSize("small")
-                            color: Appearance.colors.colSubtext
-                            wrapMode: Text.WordWrap
-                            maximumLineCount: 2
-                            elide: Text.ElideRight
-                        }
-
-                        Item { Layout.fillHeight: true }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: Metrics.spacing(8)
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: (modelData.author || "Unknown") + " - " + (modelData.sourceName || "Catalog")
-                                font.pixelSize: Metrics.fontSize("smaller")
-                                color: Appearance.colors.colSubtext
-                                elide: Text.ElideRight
-                            }
-
-                            StyledButton {
-                                Layout.preferredWidth: 120
-                                text: modelData.installed ? "Remove" : "Install"
-                                icon: modelData.installed ? "delete" : "download"
-                                secondary: modelData.installed
-                                enabled: !root.busy
-                                onClicked: root.runPackageAction(modelData)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    ContentCard {
-        Layout.fillWidth: true
-        visible: !root.loading && root.filteredCatalog.length === 0
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: Metrics.margin("verylarge")
+        spacing: Metrics.spacing(16)
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Metrics.margin("normal")
+            spacing: Metrics.spacing(18)
 
-            MaterialSymbol {
-                icon: "travel_explore"
-                iconSize: 30
-                color: Appearance.m3colors.m3onSurfaceVariant
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Metrics.spacing(2)
+
+                StyledText {
+                    text: "HypeStore"
+                    font.pixelSize: Metrics.fontSize("wildass")
+                    font.weight: Font.Black
+                    color: MaterialColors.colors.on_background
+                }
+
+                StyledText {
+                    text: "Themes, gadgets, and shell modules"
+                    font.pixelSize: Metrics.fontSize("normal")
+                    color: MaterialColors.colors.on_surface_variant
+                }
+            }
+
+            StyledTextField {
+                Layout.preferredWidth: Math.min(420, root.width * 0.36)
+                Layout.preferredHeight: 50
+                icon: "search"
+                placeholder: "Search store"
+                text: root.searchQuery
+                onTextChanged: root.searchQuery = text
+            }
+
+            StyledButton {
+                Layout.preferredWidth: 48
+                Layout.preferredHeight: 48
+                icon: "refresh"
+                text: ""
+                secondary: true
+                enabled: !root.busy
+                tooltipText: "Refresh catalog"
+                onClicked: root.reloadCatalog()
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Metrics.spacing(10)
+
+            Repeater {
+                model: root.categories
+
+                StyledButton {
+                    text: modelData.label + "  " + root.countForType(modelData.type)
+                    icon: modelData.icon
+                    secondary: root.currentCategory !== modelData.id
+                    checked: root.currentCategory === modelData.id
+                    onClicked: root.currentCategory = modelData.id
+                }
+            }
+
+            Item { Layout.fillWidth: true }
+
+            StyledText {
+                text: root.statusText
+                visible: root.statusText.length > 0
+                color: MaterialColors.colors.on_surface_variant
+                font.pixelSize: Metrics.fontSize("small")
+                elide: Text.ElideRight
+                Layout.maximumWidth: 300
+            }
+        }
+
+        Flickable {
+            id: scroll
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+            contentWidth: width
+            contentHeight: contentColumn.implicitHeight + Metrics.margin("normal")
+            boundsBehavior: Flickable.StopAtBounds
+            ScrollBar.vertical: ScrollBar { }
+
+            ColumnLayout {
+                id: contentColumn
+
+                width: scroll.width
+                spacing: Metrics.spacing(16)
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 168
+                    radius: Metrics.radius("large")
+                    color: MaterialColors.colors.surface_container_low
+                    border.color: MaterialColors.colors.outline_variant
+                    border.width: 1
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: Metrics.margin("large")
+                        spacing: Metrics.spacing(18)
+
+                        Rectangle {
+                            Layout.preferredWidth: 96
+                            Layout.preferredHeight: 96
+                            radius: Metrics.radius("large")
+                            color: root.tintForType(root.featuredItem.packageType)
+
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                icon: root.iconForType(root.featuredItem.packageType)
+                                iconSize: 46
+                                color: root.onTintForType(root.featuredItem.packageType)
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Metrics.spacing(8)
+
+                            RowLayout {
+                                spacing: Metrics.spacing(8)
+
+                                StorePill {
+                                    label: "Featured"
+                                }
+
+                                StorePill {
+                                    label: root.labelForType(root.featuredItem.packageType)
+                                }
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: root.featuredItem.name || "HypeStore"
+                                font.pixelSize: Metrics.fontSize("hugeass")
+                                font.weight: Font.Black
+                                color: MaterialColors.colors.on_surface
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: root.featuredItem.description || "Browse installable packages for HypeShell."
+                                font.pixelSize: Metrics.fontSize("normal")
+                                color: MaterialColors.colors.on_surface_variant
+                                wrapMode: Text.WordWrap
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        StyledButton {
+                            Layout.preferredWidth: 132
+                            text: root.featuredItem.installed ? "Installed" : "Get"
+                            icon: root.featuredItem.installed ? "check" : "download"
+                            secondary: root.featuredItem.installed
+                            enabled: !root.featuredItem.installed && !root.busy
+                            onClicked: root.runPackageAction(root.featuredItem)
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Metrics.spacing(12)
+
+                    StoreStat {
+                        label: "Catalog"
+                        value: String(root.catalog.length)
+                    }
+                    StoreStat {
+                        label: "Installed"
+                        value: String(root.installedCount())
+                    }
+                    StoreStat {
+                        label: "Showing"
+                        value: String(root.filteredCatalog.length)
+                    }
+                    Item { Layout.fillWidth: true }
+                }
+
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: root.width > 940 ? 2 : 1
+                    columnSpacing: Metrics.spacing(14)
+                    rowSpacing: Metrics.spacing(14)
+
+                    Repeater {
+                        model: root.filteredCatalog
+
+                        delegate: StorePackageCard {
+                            Layout.fillWidth: true
+                            itemData: modelData
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 118
+                    radius: Metrics.radius("large")
+                    color: MaterialColors.colors.surface_container
+                    visible: !root.loading && root.filteredCatalog.length === 0
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: Metrics.margin("large")
+                        spacing: Metrics.spacing(14)
+
+                        MaterialSymbol {
+                            icon: "travel_explore"
+                            iconSize: 34
+                            color: MaterialColors.colors.on_surface_variant
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            StyledText {
+                                text: root.searchQuery.length > 0 ? "No matching packages" : "Catalog is empty"
+                                font.pixelSize: Metrics.fontSize("large")
+                                font.bold: true
+                                color: MaterialColors.colors.on_surface
+                            }
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: root.searchQuery.length > 0
+                                    ? "Try a different search term or category."
+                                    : "Refresh the catalog after adding a source in ~/.config/hype/store/sources.json."
+                                color: MaterialColors.colors.on_surface_variant
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    component StorePill: Rectangle {
+        property string label: ""
+
+        implicitWidth: pillText.implicitWidth + 20
+        implicitHeight: 26
+        radius: 13
+        color: MaterialColors.colors.surface_container_high
+
+        StyledText {
+            id: pillText
+            anchors.centerIn: parent
+            text: label
+            font.pixelSize: Metrics.fontSize("smaller")
+            color: MaterialColors.colors.on_surface_variant
+        }
+    }
+
+    component StoreStat: Rectangle {
+        property string label: ""
+        property string value: ""
+
+        Layout.preferredWidth: 150
+        Layout.preferredHeight: 62
+        radius: Metrics.radius("normal")
+        color: MaterialColors.colors.surface_container
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: Metrics.margin("small")
+            spacing: Metrics.spacing(8)
+
+            StyledText {
+                text: value
+                font.pixelSize: Metrics.fontSize("huge")
+                font.weight: Font.Black
+                color: MaterialColors.colors.on_surface
+            }
+
+            StyledText {
+                text: label
+                font.pixelSize: Metrics.fontSize("small")
+                color: MaterialColors.colors.on_surface_variant
+            }
+        }
+    }
+
+    component StorePackageCard: Rectangle {
+        property var itemData: ({})
+
+        Layout.preferredHeight: 160
+        radius: Metrics.radius("large")
+        color: MaterialColors.colors.surface_container_low
+        border.color: MaterialColors.colors.outline_variant
+        border.width: 1
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: Metrics.margin("normal")
+            spacing: Metrics.spacing(14)
+
+            Rectangle {
+                Layout.preferredWidth: 62
+                Layout.preferredHeight: 62
+                Layout.alignment: Qt.AlignTop
+                radius: Metrics.radius("normal")
+                color: root.tintForType(itemData.packageType)
+
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    icon: root.iconForType(itemData.packageType)
+                    iconSize: 30
+                    color: root.onTintForType(itemData.packageType)
+                }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: Metrics.spacing(5)
 
-                StyledText {
-                    text: root.searchQuery.length > 0 ? "No matching packages" : "Catalog is empty"
-                    font.pixelSize: Metrics.fontSize("large")
-                    font.bold: true
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: itemData.name || itemData.id
+                        font.bold: true
+                        font.pixelSize: Metrics.fontSize("large")
+                        color: MaterialColors.colors.on_surface
+                        elide: Text.ElideRight
+                    }
+
+                    StorePill {
+                        label: root.labelForType(itemData.packageType)
+                    }
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: root.searchQuery.length > 0
-                        ? "Try a different search term or category."
-                        : "Refresh the catalog after adding a source in ~/.config/hype/store/sources.json."
-                    color: Appearance.colors.colSubtext
+                    text: itemData.description || "No description provided."
+                    font.pixelSize: Metrics.fontSize("small")
+                    color: MaterialColors.colors.on_surface_variant
                     wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
+                }
+
+                Item { Layout.fillHeight: true }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Metrics.spacing(8)
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: (itemData.author || "Unknown") + " / " + (itemData.sourceName || "Catalog")
+                        font.pixelSize: Metrics.fontSize("smaller")
+                        color: MaterialColors.colors.on_surface_variant
+                        elide: Text.ElideRight
+                    }
+
+                    StyledButton {
+                        Layout.preferredWidth: 116
+                        text: itemData.installed ? "Remove" : "Install"
+                        icon: itemData.installed ? "delete" : "download"
+                        secondary: itemData.installed
+                        enabled: !root.busy
+                        onClicked: root.runPackageAction(itemData)
+                    }
                 }
             }
         }

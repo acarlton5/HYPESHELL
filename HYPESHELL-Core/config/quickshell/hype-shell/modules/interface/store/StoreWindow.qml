@@ -42,7 +42,7 @@ PanelWindow {
         height: Math.max(460, Math.min(parent.height - Metrics.margin("verylarge"), 760))
         x: Math.max(0, (parent.width - width) / 2)
         y: Math.max(0, (parent.height - height) / 2)
-        color: Appearance.m3colors.m3background
+        color: MaterialColors.colors.background
         radius: Appearance.rounding.large
 
         function clampToScreen() {
