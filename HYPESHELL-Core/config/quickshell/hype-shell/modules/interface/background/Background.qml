@@ -229,8 +229,10 @@ Scope {
 
             HypeModule {
                 anchors.centerIn: parent
-                source: "file://" + Directories.shellConfig + "/modules/gadgets/DesktopClockGadget.qml"
-                visible: Config.runtime.appearance.clock.enabled || true
+                moduleId: "desktop-clock"
+                moduleName: "Desktop Clock"
+                source: Qt.resolvedUrl("../../gadgets/DesktopClockGadget.qml")
+                visible: Config.runtime.appearance.background.clock.enabled
             }
 
             IpcHandler {
