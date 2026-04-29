@@ -37,7 +37,7 @@ Item {
                 width: view.width
                 height: view.height
                 sourceComponent: modelData.content === "GadgetStage" ? gadgetStageComp : null
-                source: modelData.content !== "GadgetStage" ? "file://" + Directories.shellConfig + "/modules/interface/sidebarLeft/" + modelData.content + ".qml" : ""
+                source: modelData.content !== "GadgetStage" ? Qt.resolvedUrl("./" + modelData.content + ".qml") : ""
             }
         }
     }

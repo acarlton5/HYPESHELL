@@ -61,7 +61,6 @@ PanelWindow {
         )
         radius: Metrics.radius("normal")
         implicitWidth: sidebarLeft.sidebarLeftWidth
-        anchors.fill: parent
 
         FocusScope {
             focus: true 

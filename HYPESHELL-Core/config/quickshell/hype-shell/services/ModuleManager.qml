@@ -8,10 +8,10 @@ Singleton {
 
     // Core list of modules that come with the installer
     readonly property var coreModules: [
-        { id: "overview", name: "Overview", icon: "overview", source: "file://" + Directories.shellConfig + "/modules/interface/sidebarLeft/SystemOverview.qml", protected: true },
-        { id: "appearance", name: "Appearance", icon: "palette", source: "file://" + Directories.shellConfig + "/modules/interface/sidebarLeft/AppearancePage.qml", protected: true },
-        { id: "settings", name: "Settings", icon: "settings", source: "file://" + Directories.shellConfig + "/modules/interface/settings/Settings.qml", protected: true },
-        { id: "quicksettings", name: "Quick Settings", icon: "settings_input_component", source: "file://" + Directories.shellConfig + "/modules/gadgets/QuickSettingsGadget.qml", protected: true }
+        { id: "overview", name: "Overview", icon: "overview", source: Qt.resolvedUrl("../modules/interface/sidebarLeft/SystemOverview.qml"), protected: true },
+        { id: "appearance", name: "Appearance", icon: "palette", source: Qt.resolvedUrl("../modules/interface/sidebarLeft/AppearancePage.qml"), protected: true },
+        { id: "settings", name: "Settings", icon: "settings", source: Qt.resolvedUrl("../modules/interface/settings/Settings.qml"), protected: true },
+        { id: "quicksettings", name: "Quick Settings", icon: "settings_input_component", source: Qt.resolvedUrl("../modules/gadgets/QuickSettingsGadget.qml"), protected: true }
     ]
 
     // Sidebar Page Configuration

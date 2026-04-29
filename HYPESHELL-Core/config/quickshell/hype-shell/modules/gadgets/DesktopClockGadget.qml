@@ -9,8 +9,8 @@ Item {
     implicitWidth: 600
     implicitHeight: 300
     
-    property bool showSeconds: Config.runtime.appearance.clock.showSeconds || false
-    property bool is24h: Config.runtime.appearance.clock.is24h || true
+    property bool showSeconds: Config.runtime.appearance.background.clock.showSeconds || false
+    property bool is24h: Config.runtime.appearance.background.clock.is24h !== false
     
     ColumnLayout {
         anchors.centerIn: parent

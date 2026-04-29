@@ -228,11 +228,50 @@ Scope {
             }
 
             HypeModule {
-                anchors.centerIn: parent
+                id: desktopClockModule
+
                 moduleId: "desktop-clock"
                 moduleName: "Desktop Clock"
                 source: Qt.resolvedUrl("../../gadgets/DesktopClockGadget.qml")
                 visible: Config.runtime.appearance.background.clock.enabled
+                width: item ? item.implicitWidth : 600
+                height: item ? item.implicitHeight : 300
+                x: clockX()
+                y: clockY()
+                z: 2
+
+                function clockX() {
+                    const saved = Number(Config.runtime.appearance.background.clock.xPos)
+                    if (saved > 0)
+                        return Math.min(saved, Math.max(0, backgroundContainer.width - width))
+                    return Math.max(0, (backgroundContainer.width - width) / 2)
+                }
+
+                function clockY() {
+                    const saved = Number(Config.runtime.appearance.background.clock.yPos)
+                    if (saved > 0)
+                        return Math.min(saved, Math.max(0, backgroundContainer.height - height))
+                    return Math.max(0, (backgroundContainer.height - height) / 2)
+                }
+
+                MouseArea {
+                    id: desktopClockDragArea
+
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                    drag.target: desktopClockModule
+                    drag.axis: Drag.XAndYAxis
+                    drag.minimumX: 0
+                    drag.minimumY: 0
+                    drag.maximumX: Math.max(0, backgroundContainer.width - desktopClockModule.width)
+                    drag.maximumY: Math.max(0, backgroundContainer.height - desktopClockModule.height)
+
+                    onReleased: {
+                        Config.updateKey("appearance.background.clock.xPos", Math.round(desktopClockModule.x))
+                        Config.updateKey("appearance.background.clock.yPos", Math.round(desktopClockModule.y))
+                    }
+                }
             }
 
             IpcHandler {
