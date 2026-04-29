@@ -17,7 +17,12 @@ PanelWindow {
     property real sidebarLeftWidth: 500
 
     function togglesidebarLeft() {
-        Globals.visiblility.sidebarLeft = !Globals.visiblility.sidebarLeft;
+        const opening = !Globals.visiblility.sidebarLeft
+        if (opening) {
+            Globals.visiblility.sidebarRight = false
+            Globals.visiblility.sidebarDev = false
+        }
+        Globals.visiblility.sidebarLeft = opening;
     }
 
     WlrLayershell.namespace: "hype:sidebarLeft"

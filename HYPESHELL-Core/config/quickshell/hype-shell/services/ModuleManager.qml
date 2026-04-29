@@ -16,7 +16,7 @@ Singleton {
 
     // Sidebar Page Configuration
     property var leftSidebarPages: [
-        { id: "overview", name: "Overview", icon: "overview", content: "GadgetStage" },
+        { id: "overview", name: "Overview", icon: "overview", content: "SystemOverview" },
         { id: "appearance", name: "Appearance", icon: "palette", content: "AppearancePage" }
     ]
     

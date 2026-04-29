@@ -19,20 +19,14 @@ Item {
             
             delegate: Item {
                 Layout.fillWidth: true
-                implicitHeight: moduleLoader.item ? moduleLoader.item.implicitHeight : 100
+                Layout.preferredHeight: moduleLoader.item ? Math.max(moduleLoader.item.implicitHeight, 100) : 100
                 
                 HypeModule {
                     id: moduleLoader
+                    anchors.fill: parent
                     moduleId: modelData
                     moduleName: ModuleManager.getModule(modelData)?.name || ""
                     source: ModuleManager.getModule(modelData)?.source || ""
-                    
-                    onItemChanged: {
-                        if (item) {
-                            item.parent = parent;
-                            item.anchors.fill = parent;
-                        }
-                    }
                 }
             }
         }

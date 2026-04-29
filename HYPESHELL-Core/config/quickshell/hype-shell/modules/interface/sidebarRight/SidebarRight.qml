@@ -91,7 +91,12 @@ PanelWindow {
     }
 
     function togglesidebarRight() {
-        Globals.visiblility.sidebarRight = !Globals.visiblility.sidebarRight
+        const opening = !Globals.visiblility.sidebarRight
+        if (opening) {
+            Globals.visiblility.sidebarLeft = false
+            Globals.visiblility.sidebarDev = false
+        }
+        Globals.visiblility.sidebarRight = opening
     }
 
     IpcHandler {

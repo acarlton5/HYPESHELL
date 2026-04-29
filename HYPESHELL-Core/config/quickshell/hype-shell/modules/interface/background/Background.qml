@@ -258,7 +258,7 @@ Scope {
                     id: desktopClockDragArea
 
                     anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
+                    acceptedButtons: Qt.RightButton
                     cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                     drag.target: desktopClockModule
                     drag.axis: Drag.XAndYAxis

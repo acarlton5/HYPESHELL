@@ -43,6 +43,10 @@ Item {
             toggle: Globals.visiblility.sidebarLeft
 
             onToggled: function(value) {
+                if (value) {
+                    Globals.visiblility.sidebarRight = false
+                    Globals.visiblility.sidebarDev = false
+                }
                 Globals.visiblility.sidebarLeft = value
             }
         }
@@ -121,6 +125,10 @@ Item {
                 rotation: 270
 
                 onToggled: function(value) {
+                    if (value) {
+                        Globals.visiblility.sidebarRight = false
+                        Globals.visiblility.sidebarDev = false
+                    }
                     Globals.visiblility.sidebarLeft = value
                 }
             }

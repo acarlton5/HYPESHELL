@@ -45,9 +45,9 @@ ColumnLayout {
             Loader {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 80
-                active: Config.runtime.modules.dssWorkspace.enabled
+                active: Config.runtime.modules.dssWorkspace && Config.runtime.modules.dssWorkspace.enabled
                 visible: active
-                source: "file://" + Directories.shellConfig + "/modules/dssWorkspace/DssLauncher.qml"
+                source: "file://" + Directories.shellConfig + "/modules/dss-systems/DssLauncher.qml"
             }
         }
     }
