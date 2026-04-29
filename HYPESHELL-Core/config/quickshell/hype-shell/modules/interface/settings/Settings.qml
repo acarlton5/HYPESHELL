@@ -55,8 +55,6 @@ Scope {
             }
 
             property int selectedIndex: 0
-            property bool sidebarCollapsed: false
-
             // Navigation helper
             function navigateTo(label) {
                 const normalized = label.toLowerCase();
@@ -111,11 +109,6 @@ Scope {
                 anchors.fill: parent
                 color: "#000000"
                 opacity: 0.35
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: Globals.states.settingsOpen = false
-                }
             }
 
             StyledRect {
@@ -148,6 +141,17 @@ Scope {
 
                     onReleased: settingsSurface.clampToScreen()
                 }
+
+                MaterialSymbol {
+                    anchors.top: parent.top
+                    anchors.right: closeButton.left
+                    anchors.topMargin: Metrics.margin("normal") + 8
+                    anchors.rightMargin: Metrics.margin("small")
+                    icon: "drag_indicator"
+                    iconSize: Metrics.iconSize(22)
+                    color: MaterialColors.colors.on_surface_variant
+                    z: 11
+                }
                 
                 RowLayout {
                     anchors.fill: parent
@@ -156,36 +160,13 @@ Scope {
                     // Sidebar
                     Rectangle {
                         Layout.fillHeight: true
-                        Layout.preferredWidth: root.sidebarCollapsed ? 80 : 300
+                        Layout.preferredWidth: 84
                         color: MaterialColors.colors.surface_container_low
                         
-                        Behavior on Layout.preferredWidth {
-                            NumberAnimation { duration: 250; easing.type: Easing.InOutCubic }
-                        }
-
                         ColumnLayout {
                             anchors.fill: parent
-                            anchors.margins: Metrics.margin("large")
-                            spacing: Metrics.spacing(4)
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                spacing: 10
-                                StyledText {
-                                    text: "Hype"
-                                    font.pixelSize: 24
-                                    font.weight: Font.Black
-                                    visible: !root.sidebarCollapsed
-                                }
-                                Item { Layout.fillWidth: true }
-                                StyledButton {
-                                    icon: root.sidebarCollapsed ? "menu_open" : "menu"
-                                    secondary: true
-                                    onClicked: root.sidebarCollapsed = !root.sidebarCollapsed
-                                }
-                            }
-
-                            Item { Layout.preferredHeight: 20 }
+                            anchors.margins: Metrics.margin("normal")
+                            spacing: Metrics.spacing(8)
 
                             ListView {
                                 Layout.fillWidth: true
@@ -196,20 +177,8 @@ Scope {
 
                                 delegate: Item {
                                     width: parent.width
-                                    height: modelData.header ? (root.sidebarCollapsed ? 0 : 40) : 48
-                                    visible: !modelData.header || !root.sidebarCollapsed
-
-                                    // Header Delegate
-                                    StyledText {
-                                        anchors.bottom: parent.bottom
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: 12
-                                        text: modelData.label.toUpperCase()
-                                        font.pixelSize: 10
-                                        font.bold: true
-                                        opacity: 0.5
-                                        visible: modelData.header && !root.sidebarCollapsed
-                                    }
+                                    height: modelData.header ? 10 : 52
+                                    visible: true
 
                                     // Item Delegate
                                     StyledRect {
@@ -219,21 +188,11 @@ Scope {
                                         color: root.selectedIndex === modelData.page ? MaterialColors.colors.secondary_container : "transparent"
                                         radius: 12
 
-                                        RowLayout {
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 12
-                                            spacing: 12
-                                            MaterialSymbol {
-                                                icon: modelData.icon || ""
-                                                iconSize: 22
-                                                color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
-                                            }
-                                            StyledText {
-                                                text: modelData.label
-                                                visible: !root.sidebarCollapsed
-                                                color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
-                                                font.weight: root.selectedIndex === modelData.page ? Font.Bold : Font.Normal
-                                            }
+                                        MaterialSymbol {
+                                            anchors.centerIn: parent
+                                            icon: modelData.icon || ""
+                                            iconSize: 24
+                                            color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
                                         }
 
                                         MouseArea {
@@ -282,6 +241,8 @@ Scope {
                         }
 
                         StyledButton {
+                            id: closeButton
+
                             anchors.top: parent.top
                             anchors.right: parent.right
                             anchors.topMargin: Metrics.margin("normal")
@@ -297,13 +258,6 @@ Scope {
                             }
                         }
                     }
-                }
-            }
-
-            Keys.onPressed: {
-                if (event.key === Qt.Key_Escape) {
-                    Globals.states.settingsOpen = false
-                    event.accepted = true
                 }
             }
         }

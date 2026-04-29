@@ -28,11 +28,6 @@ PanelWindow {
         anchors.fill: parent
         color: "#000000"
         opacity: 0.35
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: Globals.visiblility.storeOpen = false
-        }
     }
 
     StyledRect {
@@ -64,11 +59,24 @@ PanelWindow {
             onReleased: storeSurface.clampToScreen()
         }
 
+        MaterialSymbol {
+            anchors.top: parent.top
+            anchors.right: closeButton.left
+            anchors.topMargin: Metrics.margin("normal") + 8
+            anchors.rightMargin: Metrics.margin("small")
+            icon: "drag_indicator"
+            iconSize: Metrics.iconSize(22)
+            color: MaterialColors.colors.on_surface_variant
+            z: 11
+        }
+
         Store {
             anchors.fill: parent
         }
 
         StyledButton {
+            id: closeButton
+
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: Metrics.margin("normal")
@@ -80,12 +88,4 @@ PanelWindow {
             onClicked: Globals.visiblility.storeOpen = false
         }
     }
-
-    Keys.onPressed: {
-        if (event.key === Qt.Key_Escape) {
-            Globals.visiblility.storeOpen = false
-            event.accepted = true
-        }
-    }
-
 }
