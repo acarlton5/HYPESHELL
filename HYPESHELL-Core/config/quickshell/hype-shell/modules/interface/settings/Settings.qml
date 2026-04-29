@@ -103,11 +103,6 @@ Scope {
                 // These will be dynamically injected or pointed to the theme folder
                 { "icon": "auto_awesome", "label": "Theme Settings", "page": 5, "source": "file://" + Directories.home + "/.config/hype/themes/" + WallpaperSlideshow.hypeThemeName + "/settings/Main.qml" },
 
-                { "header": true, "label": "HypeStore" },
-                { "icon": "shopping_cart", "label": "Store", "page": 6, "source": Qt.resolvedUrl("Store.qml") },
-                { "icon": "toys", "label": "Modules", "page": 7, "source": Qt.resolvedUrl("ModulesConfig.qml"), "props": { "viewMode": "modules" } },
-                { "icon": "widgets", "label": "Gadgets", "page": 8, "source": Qt.resolvedUrl("ModulesConfig.qml"), "props": { "viewMode": "gadgets" } },
-
                 { "header": true, "label": "Support" },
                 { "icon": "info", "label": "About", "page": 11, "source": Qt.resolvedUrl("About.qml") }
             ]
@@ -124,12 +119,35 @@ Scope {
             }
 
             StyledRect {
+                id: settingsSurface
+
                 width: Math.max(320, Math.min(parent.width - Metrics.margin("verylarge"), 1280))
                 height: Math.max(360, Math.min(parent.height - Metrics.margin("verylarge"), 720))
-                anchors.centerIn: parent
+                x: Math.max(0, (parent.width - width) / 2)
+                y: Math.max(0, (parent.height - height) / 2)
                 color: Appearance.m3colors.m3background
-                opacity: Appearance.transparency.enabled ? Appearance.transparency.alpha : 1.0
+                opacity: 1.0
                 radius: Appearance.rounding.large
+
+                function clampToScreen() {
+                    x = Math.max(0, Math.min(x, root.width - width))
+                    y = Math.max(0, Math.min(y, root.height - height))
+                }
+
+                MouseArea {
+                    z: 10
+                    anchors.fill: parent
+                    acceptedButtons: Qt.RightButton
+                    cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                    drag.target: settingsSurface
+                    drag.axis: Drag.XAndYAxis
+                    drag.minimumX: 0
+                    drag.minimumY: 0
+                    drag.maximumX: Math.max(0, root.width - settingsSurface.width)
+                    drag.maximumY: Math.max(0, root.height - settingsSurface.height)
+
+                    onReleased: settingsSurface.clampToScreen()
+                }
                 
                 RowLayout {
                     anchors.fill: parent

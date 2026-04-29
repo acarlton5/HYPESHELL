@@ -15,6 +15,7 @@ Singleton {
         property bool sidebarLeft: false
         property bool sidebarDev: false
         property bool dssFullPanelOpen: false
+        property bool storeOpen: false
     }
 
     states: QtObject {

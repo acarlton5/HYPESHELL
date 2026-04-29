@@ -76,7 +76,7 @@ ContentMenu {
                 }
                 StyledSwitch {
                     checked: Config.runtime.appearance.transparency.enabled
-                    onToggled: Config.runtime.appearance.transparency.enabled = checked
+                    onToggled: Config.updateKey("appearance.transparency.enabled", checked)
                 }
             }
 
@@ -107,7 +107,7 @@ ContentMenu {
                     from: 0.1
                     to: 1.0
                     value: Config.runtime.appearance.transparency.alpha
-                    onMoved: Config.runtime.appearance.transparency.alpha = value
+                    onMoved: Config.updateKey("appearance.transparency.alpha", value)
                 }
             }
         }
@@ -136,7 +136,7 @@ ContentMenu {
                 }
                 StyledSwitch {
                     checked: Config.runtime.appearance.animations.enabled
-                    onToggled: Config.runtime.appearance.animations.enabled = checked
+                    onToggled: Config.updateKey("appearance.animations.enabled", checked)
                 }
             }
 
@@ -167,7 +167,7 @@ ContentMenu {
                     from: 0.1
                     to: 2.0
                     value: Config.runtime.appearance.animations.durationScale
-                    onMoved: Config.runtime.appearance.animations.durationScale = value
+                    onMoved: Config.updateKey("appearance.animations.durationScale", value)
                 }
             }
         }
@@ -204,7 +204,7 @@ ContentMenu {
                     from: 0.0
                     to: 2.0
                     value: Config.runtime.appearance.rounding.factor
-                    onMoved: Config.runtime.appearance.rounding.factor = value
+                    onMoved: Config.updateKey("appearance.rounding.factor", value)
                 }
             }
         }

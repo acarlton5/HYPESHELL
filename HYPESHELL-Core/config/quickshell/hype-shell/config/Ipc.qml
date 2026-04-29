@@ -126,6 +126,30 @@ Scope {
         }
     }
 
+    IpcHandler {
+        target: "store"
+
+        function open() {
+            Globals.states.settingsOpen = false
+            Globals.visiblility.sidebarLeft = false
+            Globals.visiblility.sidebarRight = false
+            Globals.visiblility.sidebarDev = false
+            Globals.visiblility.storeOpen = true
+        }
+
+        function close() {
+            Globals.visiblility.storeOpen = false
+        }
+
+        function toggle() {
+            if (Globals.visiblility.storeOpen) {
+                Globals.visiblility.storeOpen = false
+            } else {
+                open()
+            }
+        }
+    }
+
     property var genColorsCmd: Config.runtime.appearance.colors.runMatugenUserWide
         ? [
             "bash",

@@ -88,7 +88,7 @@ Item {
     Item {
         id: segmentedIndicator
 
-        height: 56
+        height: 44
         width: parent.width
 
         anchors {
@@ -119,24 +119,7 @@ Item {
                         color: view.currentIndex === index ? Appearance.m3colors.m3primary : Appearance.m3colors.m3onSurfaceVariant
 
                         anchors {
-                            horizontalCenter: parent.horizontalCenter
-                            top: parent.top
-                            topMargin: Metrics.margin(12)
-                        }
-
-                    }
-
-                    // Label (independent centering)
-                    StyledText {
-                        text: modelData.name
-                        font.pixelSize: Metrics.fontSize("large")
-                        font.weight: Font.Medium
-                        color: view.currentIndex === index ? Appearance.m3colors.m3primary : Appearance.m3colors.m3onSurfaceVariant
-
-                        anchors {
-                            horizontalCenter: parent.horizontalCenter
-                            bottom: parent.bottom
-                            bottomMargin: 0
+                            centerIn: parent
                         }
 
                     }

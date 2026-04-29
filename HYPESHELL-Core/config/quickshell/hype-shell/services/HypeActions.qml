@@ -34,6 +34,22 @@ Singleton {
         Globals.states.settingsOpen = !Globals.states.settingsOpen;
     }
 
+    function openStore() {
+        Globals.states.settingsOpen = false;
+        Globals.visiblility.sidebarLeft = false;
+        Globals.visiblility.sidebarRight = false;
+        Globals.visiblility.sidebarDev = false;
+        Globals.visiblility.storeOpen = true;
+    }
+
+    function toggleStore() {
+        if (Globals.visiblility.storeOpen) {
+            Globals.visiblility.storeOpen = false;
+        } else {
+            openStore();
+        }
+    }
+
     // Specialized Actions
     function changeWallpaper() {
         openSidebarLeft("appearance");

@@ -12,6 +12,7 @@ import qs.modules.interface.notifications
 import qs.modules.interface.overlays
 import qs.modules.interface.sidebarRight
 import qs.modules.interface.settings
+import qs.modules.interface.store
 import qs.modules.interface.sidebarLeft
 import qs.modules.interface.lockscreen
 import qs.modules.interface.screencapture
@@ -87,6 +88,10 @@ ShellRoot {
     LazyLoader {
         active: Globals.states.settingsOpen
         Settings { }
+    }
+    LazyLoader {
+        active: Globals.visiblility.storeOpen
+        StoreWindow { }
     }
     Ipc { }
     UpdateNotifier { }
