@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import Quickshell.Widgets
 import qs.config
 import qs.modules.functions
@@ -12,9 +13,11 @@ import qs.services
 Scope {
     id: scope
     property var settingsWindow: null
+    property string pendingMenu: ""
 
     IpcHandler {
         function open(menu: string) {
+            scope.pendingMenu = menu;
             Globals.states.settingsOpen = true;
             if (settingsWindow) {
                 settingsWindow.navigateTo(menu);
@@ -28,11 +31,28 @@ Scope {
 
         PanelWindow {
             id: root
-            width: 1280
-            height: 720
             visible: true
+            focusable: true
+            aboveWindows: true
             color: "transparent"
-            Component.onCompleted: settingsWindow = root
+            exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+            Component.onCompleted: {
+                settingsWindow = root
+                if (scope.pendingMenu !== "")
+                    root.navigateTo(scope.pendingMenu)
+            }
+            Component.onDestruction: {
+                if (settingsWindow === root)
+                    settingsWindow = null
+            }
+
+            anchors {
+                top: true
+                bottom: true
+                left: true
+                right: true
+            }
 
             property int selectedIndex: 0
             property bool sidebarCollapsed: false
@@ -48,33 +68,65 @@ Scope {
                 }
             }
 
+            function selectedPage() {
+                for (var i = 0; i < menuModel.length; i++) {
+                    if (!menuModel[i].header && menuModel[i].page === root.selectedIndex)
+                        return menuModel[i]
+                }
+                return menuModel[1]
+            }
+
+            function applyPageProps() {
+                const page = selectedPage()
+                if (!page || !page.props || !settingsPage.item)
+                    return
+
+                for (var p in page.props) {
+                    if (settingsPage.item.hasOwnProperty(p))
+                        settingsPage.item[p] = page.props[p]
+                }
+            }
+
             property var menuModel: [
                 { "header": true, "label": "System" },
-                { "icon": "bluetooth", "label": "Bluetooth", "page": 0, "source": "BluetoothConfig.qml" },
-                { "icon": "network_wifi", "label": "Wireless", "page": 1, "source": "NetworkConfig.qml" },
-                { "icon": "volume_up", "label": "Audio", "page": 2, "source": "AudioConfig.qml" },
+                { "icon": "bluetooth", "label": "Bluetooth", "page": 0, "source": Qt.resolvedUrl("BluetoothConfig.qml") },
+                { "icon": "network_wifi", "label": "Wireless", "page": 1, "source": Qt.resolvedUrl("NetworkConfig.qml") },
+                { "icon": "volume_up", "label": "Audio", "page": 2, "source": Qt.resolvedUrl("AudioConfig.qml") },
 
                 { "header": true, "label": "Appearance" },
-                { "icon": "palette", "label": "Theme", "page": 3, "source": "AppearanceConfig.qml" },
-                { "icon": "dark_mode", "label": "Appearance Mode", "page": 9, "source": "ThemeVariantConfig.qml" },
-                { "icon": "wallpaper", "label": "Wallpapers", "page": 4, "source": "WallpaperConfig.qml" },
-                { "icon": "auto_awesome", "label": "Wallbash", "page": 10, "source": "WallbashConfig.qml" },
+                { "icon": "palette", "label": "Theme", "page": 3, "source": Qt.resolvedUrl("AppearanceConfig.qml") },
+                { "icon": "dark_mode", "label": "Appearance Mode", "page": 9, "source": Qt.resolvedUrl("ThemeVariantConfig.qml") },
+                { "icon": "wallpaper", "label": "Wallpapers", "page": 4, "source": Qt.resolvedUrl("WallpaperConfig.qml") },
+                { "icon": "auto_awesome", "label": "Wallbash", "page": 10, "source": Qt.resolvedUrl("WallbashConfig.qml") },
 
                 { "header": true, "label": "Theme Specific" },
                 // These will be dynamically injected or pointed to the theme folder
                 { "icon": "auto_awesome", "label": "Theme Settings", "page": 5, "source": "file://" + Directories.home + "/.config/hype/themes/" + WallpaperSlideshow.hypeThemeName + "/settings/Main.qml" },
 
                 { "header": true, "label": "HypeStore" },
-                { "icon": "shopping_cart", "label": "Store", "page": 6, "source": "Store.qml" },
-                { "icon": "toys", "label": "Modules", "page": 7, "source": "ModulesConfig.qml", "props": { "viewMode": "modules" } },
-                { "icon": "widgets", "label": "Gadgets", "page": 8, "source": "ModulesConfig.qml", "props": { "viewMode": "gadgets" } },
+                { "icon": "shopping_cart", "label": "Store", "page": 6, "source": Qt.resolvedUrl("Store.qml") },
+                { "icon": "toys", "label": "Modules", "page": 7, "source": Qt.resolvedUrl("ModulesConfig.qml"), "props": { "viewMode": "modules" } },
+                { "icon": "widgets", "label": "Gadgets", "page": 8, "source": Qt.resolvedUrl("ModulesConfig.qml"), "props": { "viewMode": "gadgets" } },
 
                 { "header": true, "label": "Support" },
-                { "icon": "info", "label": "About", "page": 11, "source": "About.qml" }
+                { "icon": "info", "label": "About", "page": 11, "source": Qt.resolvedUrl("About.qml") }
             ]
 
-            StyledRect {
+            Rectangle {
                 anchors.fill: parent
+                color: "#000000"
+                opacity: 0.35
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Globals.states.settingsOpen = false
+                }
+            }
+
+            StyledRect {
+                width: Math.max(320, Math.min(parent.width - Metrics.margin("verylarge"), 1280))
+                height: Math.max(360, Math.min(parent.height - Metrics.margin("verylarge"), 720))
+                anchors.centerIn: parent
                 color: Appearance.m3colors.m3background
                 opacity: Appearance.transparency.enabled ? Appearance.transparency.alpha : 1.0
                 radius: Appearance.rounding.large
@@ -177,54 +229,63 @@ Scope {
                     }
 
                     // Content Area
-                    StackLayout {
+                    Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        currentIndex: root.selectedIndex
 
-                        Repeater {
-                            model: root.menuModel
-                            HypeModule {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                moduleName: modelData.label || ""
-                                source: modelData.source ? (modelData.source.startsWith("/") ? "file://" + modelData.source : modelData.source) : ""
-                                visible: root.selectedIndex === modelData.page
-                                
-                                // Fallback for missing dynamic theme settings
-                                Rectangle {
-                                    anchors.fill: parent
-                                    visible: modelData.label === "Theme Settings" && hasError
-                                    color: "transparent"
-                                    ColumnLayout {
-                                        anchors.centerIn: parent
-                                        spacing: 12
-                                        MaterialSymbol {
-                                            icon: "auto_awesome_motion"
-                                            iconSize: 64
-                                            opacity: 0.2
-                                            Layout.alignment: Qt.AlignHCenter
-                                        }
-                                        StyledText {
-                                            text: "This theme does not have custom settings."
-                                            opacity: 0.5
-                                            Layout.alignment: Qt.AlignHCenter
-                                        }
-                                    }
+                        HypeModule {
+                            id: settingsPage
+                            anchors.fill: parent
+                            moduleName: root.selectedPage().label || ""
+                            source: root.selectedPage().source || ""
+
+                            onItemChanged: root.applyPageProps()
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            visible: root.selectedPage().label === "Theme Settings" && settingsPage.hasError
+                            color: Appearance.m3colors.m3background
+                            ColumnLayout {
+                                anchors.centerIn: parent
+                                spacing: 12
+                                MaterialSymbol {
+                                    icon: "auto_awesome_motion"
+                                    iconSize: 64
+                                    opacity: 0.2
+                                    Layout.alignment: Qt.AlignHCenter
                                 }
-                                
-                                Component.onCompleted: {
-                                    if (modelData.props) {
-                                        for (var p in modelData.props) {
-                                            if (item && item.hasOwnProperty(p)) {
-                                                item[p] = modelData.props[p];
-                                            }
-                                        }
-                                    }
+                                StyledText {
+                                    text: "This theme does not have custom settings."
+                                    opacity: 0.5
+                                    Layout.alignment: Qt.AlignHCenter
                                 }
                             }
                         }
+
+                        StyledButton {
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.topMargin: Metrics.margin("normal")
+                            anchors.rightMargin: Metrics.margin("normal")
+                            icon: "close"
+                            text: ""
+                            secondary: true
+                            tooltipText: "Close settings"
+                            onClicked: {
+                                Globals.states.settingsOpen = false
+                                if (settingsWindow === root)
+                                    settingsWindow = null
+                            }
+                        }
                     }
+                }
+            }
+
+            Keys.onPressed: {
+                if (event.key === Qt.Key_Escape) {
+                    Globals.states.settingsOpen = false
+                    event.accepted = true
                 }
             }
         }

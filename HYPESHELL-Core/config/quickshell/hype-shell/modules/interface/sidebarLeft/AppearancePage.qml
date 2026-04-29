@@ -11,6 +11,7 @@ import qs.modules.components
 Item {
     id: root
     anchors.fill: parent
+    property string wallpaperFolder: "file://" + Quickshell.env("HOME") + "/Pictures"
 
     Flickable {
         anchors.fill: parent
@@ -25,6 +26,7 @@ Item {
             anchors.leftMargin: Metrics.margin("normal")
             anchors.rightMargin: Metrics.margin("normal")
             anchors.topMargin: 100
+            anchors.top: parent.top
             spacing: Metrics.margin("large")
 
             // LIGHT / DARK MODE SELECTOR
@@ -80,6 +82,14 @@ Item {
                     font.weight: Font.Bold
                 }
 
+                StyledText {
+                    text: wallpaperFolder.replace("file://" + Quickshell.env("HOME"), "~")
+                    font.pixelSize: Metrics.fontSize("small")
+                    color: Appearance.m3colors.m3onSurfaceVariant
+                    elide: Text.ElideMiddle
+                    Layout.fillWidth: true
+                }
+
                 // Grid of Wallpapers
                 GridLayout {
                     id: wallGrid
@@ -97,7 +107,8 @@ Item {
                             ContentCard {
                                 anchors.fill: parent
                                 clip: true
-                                padding: 0
+                                cardMargin: 0
+                                verticalPadding: 0
 
                                 Image {
                                     anchors.fill: parent
@@ -119,29 +130,38 @@ Item {
                         }
                     }
                 }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: wallpaperModel.count === 0
+                    text: "No wallpapers found in this folder."
+                    font.pixelSize: Metrics.fontSize("normal")
+                    color: Appearance.m3colors.m3onSurfaceVariant
+                    horizontalAlignment: Text.AlignHCenter
+                }
             }
         }
     }
 
     FolderListModel {
         id: wallpaperModel
-        folder: "file://" + Quickshell.env("HOME") + "/.config/quickshell/hype-shell/defaults" // Fallback
-        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
+        folder: root.wallpaperFolder
+        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.PNG", "*.JPG", "*.JPEG", "*.WEBP"]
         showDirs: false
     }
 
-    // Try to resolve the actual theme wallpaper folder
-    property string hypeThemeName: ""
+    function setWallpaperFolder(path) {
+        const cleaned = String(path || "").trim()
+        root.wallpaperFolder = "file://" + (cleaned.length > 0 ? cleaned : Quickshell.env("HOME") + "/Pictures")
+    }
+
     Process {
         id: readHypeThemeProc
-        command: ["bash", "-lc", "sed -n 's/^hypeTheme=\"\\([^\"]*\\)\"$/\\1/p' \"$HOME/.config/hype/hype.conf\" | head -n1"]
+        command: ["bash", "-lc", "theme=$(sed -nE 's/^[[:space:]]*hypeTheme[[:space:]]*=[[:space:]]*\"?([^\"[:space:]]+)\"?.*$/\\1/p' \"$HOME/.config/hype/hype.conf\" | head -n1); theme_dir=\"$HOME/.config/hype/themes/$theme/wallpapers\"; if [ -n \"$theme\" ] && [ -d \"$theme_dir\" ]; then printf '%s' \"$theme_dir\"; else printf '%s' \"$HOME/Pictures\"; fi"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
-                const name = String(text || "").trim();
-                if (name.length > 0) {
-                    wallpaperModel.folder = "file://" + Quickshell.env("HOME") + "/.config/hype/themes/" + name + "/wallpapers"
-                }
+                root.setWallpaperFolder(text)
             }
         }
     }

@@ -85,7 +85,7 @@ ContentMenu {
             text: "Change Wallpaper"
             Layout.fillWidth: true
             onClicked: {
-                Globals.states.sidebarLeftPage = 2
+                Globals.states.sidebarLeftPage = 1
                 Globals.visiblility.sidebarRight = false
                 Globals.visiblility.sidebarLeft = true
                 Quickshell.execDetached(["hype", "ipc", "call", "sidebarLeft", "openWallpapers"])
