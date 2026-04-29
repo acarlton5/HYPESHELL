@@ -71,14 +71,14 @@ ColumnLayout {
             
             Repeater {
                 model: [
-                    { name: "Primary", color: Appearance.colors.colPrimary },
-                    { name: "Accent", color: Appearance.m3colors.m3tertiary },
-                    { name: "Surface", color: Appearance.colors.colLayer0 },
-                    { name: "Text", color: Appearance.colors.colOnLayer1 },
-                    { name: "Surface Overlay", color: Appearance.colors.colLayer1 },
-                    { name: "Muted Text", color: Appearance.colors.colSubtext },
-                    { name: "Error", color: Appearance.m3colors.m3error },
-                    { name: "Outline", color: Appearance.colors.colOutline }
+                    { name: "Primary", color: Appearance.colors.colPrimary, onColor: Appearance.colors.colOnPrimary },
+                    { name: "Accent", color: Appearance.m3colors.m3tertiary, onColor: Appearance.m3colors.m3onTertiary },
+                    { name: "Surface", color: Appearance.colors.colLayer0, onColor: Appearance.m3colors.m3onSurface },
+                    { name: "Text", color: Appearance.colors.colOnLayer1, onColor: Appearance.colors.colLayer1 },
+                    { name: "Surface Overlay", color: Appearance.colors.colLayer1, onColor: Appearance.colors.colOnLayer1 },
+                    { name: "Muted Text", color: Appearance.colors.colSubtext, onColor: Appearance.colors.colLayer1 },
+                    { name: "Error", color: Appearance.m3colors.m3error, onColor: Appearance.m3colors.m3onError },
+                    { name: "Outline", color: Appearance.colors.colOutline, onColor: Appearance.colors.colLayer0 }
                 ]
                 
                 ColumnLayout {
@@ -90,9 +90,18 @@ ColumnLayout {
                         color: modelData.color
                         border.color: Appearance.colors.colOutline
                         border.width: 1
+
+                        StyledText {
+                            anchors.centerIn: parent
+                            text: "Aa"
+                            color: modelData.onColor
+                            font.pixelSize: 14
+                            font.weight: Font.Bold
+                        }
                     }
                     StyledText {
                         text: modelData.name
+                        color: Appearance.colors.colOnLayer2
                         font.pixelSize: 10
                         Layout.alignment: Qt.AlignHCenter
                     }

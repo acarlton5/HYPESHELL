@@ -62,6 +62,10 @@ Singleton {
                 : c
         }
 
+        function text(c) {
+            return c
+        }
+
         readonly property color m3background: t(MaterialColors.colors.background)
         readonly property color m3paddingContainer: t(Config.runtime.bar.modules.paddingColor)
         readonly property color m3surface: t(MaterialColors.colors.surface)
@@ -74,12 +78,12 @@ Singleton {
         readonly property color m3surfaceContainerHigh: tH(MaterialColors.colors.surface_container_high)
         readonly property color m3surfaceContainerHighest: tH(MaterialColors.colors.surface_container_highest)
 
-        readonly property color m3onSurface: t(MaterialColors.colors.on_surface)
+        readonly property color m3onSurface: text(MaterialColors.colors.on_surface)
         readonly property color m3surfaceVariant: t(MaterialColors.colors.surface_variant)
-        readonly property color m3onSurfaceVariant: t(MaterialColors.colors.on_surface_variant)
+        readonly property color m3onSurfaceVariant: text(MaterialColors.colors.on_surface_variant)
 
         readonly property color m3inverseSurface: t(MaterialColors.colors.inverse_surface)
-        readonly property color m3inverseOnSurface: t(MaterialColors.colors.inverse_on_surface)
+        readonly property color m3inverseOnSurface: text(MaterialColors.colors.inverse_on_surface)
 
         readonly property color m3outline: t(MaterialColors.colors.outline)
         readonly property color m3outlineVariant: t(MaterialColors.colors.outline_variant)
@@ -88,40 +92,40 @@ Singleton {
         readonly property color m3surfaceTint: t(MaterialColors.colors.surface_tint)
 
         readonly property color m3primary: t(MaterialColors.colors.primary)
-        readonly property color m3onPrimary: t(MaterialColors.colors.on_primary)
+        readonly property color m3onPrimary: text(MaterialColors.colors.on_primary)
         readonly property color m3primaryContainer: t(MaterialColors.colors.primary_container)
-        readonly property color m3onPrimaryContainer: t(MaterialColors.colors.on_primary_container)
+        readonly property color m3onPrimaryContainer: text(MaterialColors.colors.on_primary_container)
         readonly property color m3inversePrimary: t(MaterialColors.colors.inverse_primary)
 
         readonly property color m3secondary: t(MaterialColors.colors.secondary)
-        readonly property color m3onSecondary: t(MaterialColors.colors.on_secondary)
+        readonly property color m3onSecondary: text(MaterialColors.colors.on_secondary)
         readonly property color m3secondaryContainer: t(MaterialColors.colors.secondary_container)
-        readonly property color m3onSecondaryContainer: t(MaterialColors.colors.on_secondary_container)
+        readonly property color m3onSecondaryContainer: text(MaterialColors.colors.on_secondary_container)
 
         readonly property color m3tertiary: t(MaterialColors.colors.tertiary)
-        readonly property color m3onTertiary: t(MaterialColors.colors.on_tertiary)
+        readonly property color m3onTertiary: text(MaterialColors.colors.on_tertiary)
         readonly property color m3tertiaryContainer: t(MaterialColors.colors.tertiary_container)
-        readonly property color m3onTertiaryContainer: t(MaterialColors.colors.on_tertiary_container)
+        readonly property color m3onTertiaryContainer: text(MaterialColors.colors.on_tertiary_container)
 
         readonly property color m3error: t(MaterialColors.colors.error)
-        readonly property color m3onError: t(MaterialColors.colors.on_error)
+        readonly property color m3onError: text(MaterialColors.colors.on_error)
         readonly property color m3errorContainer: t(MaterialColors.colors.error_container)
-        readonly property color m3onErrorContainer: t(MaterialColors.colors.on_error_container)
+        readonly property color m3onErrorContainer: text(MaterialColors.colors.on_error_container)
 
         readonly property color m3primaryFixed: t(MaterialColors.colors.primary_fixed)
         readonly property color m3primaryFixedDim: t(MaterialColors.colors.primary_fixed_dim)
-        readonly property color m3onPrimaryFixed: t(MaterialColors.colors.on_primary_fixed)
-        readonly property color m3onPrimaryFixedVariant: t(MaterialColors.colors.on_primary_fixed_variant)
+        readonly property color m3onPrimaryFixed: text(MaterialColors.colors.on_primary_fixed)
+        readonly property color m3onPrimaryFixedVariant: text(MaterialColors.colors.on_primary_fixed_variant)
 
         readonly property color m3secondaryFixed: t(MaterialColors.colors.secondary_fixed)
         readonly property color m3secondaryFixedDim: t(MaterialColors.colors.secondary_fixed_dim)
-        readonly property color m3onSecondaryFixed: t(MaterialColors.colors.on_secondary_fixed)
-        readonly property color m3onSecondaryFixedVariant: t(MaterialColors.colors.on_secondary_fixed_variant)
+        readonly property color m3onSecondaryFixed: text(MaterialColors.colors.on_secondary_fixed)
+        readonly property color m3onSecondaryFixedVariant: text(MaterialColors.colors.on_secondary_fixed_variant)
 
         readonly property color m3tertiaryFixed: t(MaterialColors.colors.tertiary_fixed)
         readonly property color m3tertiaryFixedDim: t(MaterialColors.colors.tertiary_fixed_dim)
-        readonly property color m3onTertiaryFixed: t(MaterialColors.colors.on_tertiary_fixed)
-        readonly property color m3onTertiaryFixedVariant: t(MaterialColors.colors.on_tertiary_fixed_variant)
+        readonly property color m3onTertiaryFixed: text(MaterialColors.colors.on_tertiary_fixed)
+        readonly property color m3onTertiaryFixedVariant: text(MaterialColors.colors.on_tertiary_fixed_variant)
 
     }
 
