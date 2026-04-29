@@ -20,6 +20,7 @@ import qs.modules.interface.polkit
 ShellRoot {
     id: shellroot 
     readonly property var _wallpaperSlideshow: WallpaperSlideshow
+    readonly property var _updateService: UpdateService
 
     // Load modules
 
@@ -88,7 +89,6 @@ ShellRoot {
         Settings { }
     }
     Ipc { }
-    UpdateService { }
     UpdateNotifier { }
     PluginHost { }
     ScreenCapture{ }

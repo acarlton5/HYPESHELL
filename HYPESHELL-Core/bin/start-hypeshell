@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -u
+
+LOG_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/hypeshell"
+LOG_FILE="$LOG_DIR/session.log"
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+CONFIG_DIR="$CONFIG_HOME/quickshell/hype-shell"
+
+mkdir -p "$LOG_DIR"
+exec >>"$LOG_FILE" 2>&1
+
+echo
+echo "=== HypeShell startup: $(date -Is) ==="
+echo "PATH=$PATH"
+echo "CONFIG_DIR=$CONFIG_DIR"
+
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
+export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
+export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-wayland;xcb}"
+export QT_WAYLAND_DISABLE_WINDOWDECORATION="${QT_WAYLAND_DISABLE_WINDOWDECORATION:-1}"
+
+if [[ ! -f "$CONFIG_DIR/shell.qml" ]]; then
+  echo "Missing shell.qml at $CONFIG_DIR/shell.qml"
+  command -v notify-send >/dev/null 2>&1 && notify-send "HypeShell" "Missing $CONFIG_DIR/shell.qml"
+  exit 2
+fi
+
+if pgrep -u "$(id -u)" -af "quickshell|qs" | grep -F "hype-shell" >/dev/null 2>&1; then
+  echo "HypeShell already appears to be running."
+  exit 0
+fi
+
+if command -v qs >/dev/null 2>&1; then
+  runner="qs"
+elif command -v quickshell >/dev/null 2>&1; then
+  runner="quickshell"
+else
+  echo "Neither qs nor quickshell was found."
+  command -v notify-send >/dev/null 2>&1 && notify-send "HypeShell" "Quickshell is not installed or not in PATH"
+  exit 127
+fi
+
+echo "Starting with: $runner -c hype-shell"
+"$runner" -c hype-shell
+status=$?
+
+if [[ $status -ne 0 ]]; then
+  echo "Config launch failed with status $status. Trying direct path fallback."
+  "$runner" -p "$CONFIG_DIR/shell.qml"
+  status=$?
+fi
+
+echo "HypeShell exited with status $status"
+exit "$status"
