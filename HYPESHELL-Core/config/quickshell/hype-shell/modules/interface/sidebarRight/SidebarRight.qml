@@ -39,8 +39,8 @@ PanelWindow {
     }
 
     margins {
-        top: Config.runtime.bar.margins
-        bottom: Config.runtime.bar.margins
+        top: 0
+        bottom: 0
         left: Metrics.margin("small")
         right: Metrics.margin("small")
     }
