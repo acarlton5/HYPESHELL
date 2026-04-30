@@ -21,6 +21,7 @@ Singleton {
     property bool updateAvailable: remoteKnown && (!localKnown || localFingerprint !== remoteFingerprint || versionUpdateAvailable)
     property string status: "Idle"
     
+    readonly property string localVersionPath: Directories.shellConfig + "/version"
     readonly property string fingerprintUrl: "https://raw.githubusercontent.com/acarlton5/HypeUpdater/main/fingerprint"
     readonly property string metadataUrl: "https://raw.githubusercontent.com/acarlton5/HypeUpdater/main/latest.json"
     readonly property string installerUrl: "https://raw.githubusercontent.com/acarlton5/HYPESHELL/main/HYPESHELL-Installer/install.sh"
@@ -34,14 +35,21 @@ Singleton {
         console.log("[UpdateService] Checking fingerprints...");
         root.status = "Checking...";
         root.errorText = "";
-        readLocalProc.running = false;
-        readLocalProc.running = true;
+        localVersionFile.reload();
+        readLocalFingerprint();
         fetchRemoteProc.running = false;
         fetchRemoteProc.command = ["curl", "-fsSL", root.fingerprintUrl + "?cacheBust=" + Date.now()];
         fetchRemoteProc.running = true;
         fetchMetadataProc.running = false;
         fetchMetadataProc.command = ["curl", "-fsSL", root.metadataUrl + "?cacheBust=" + Date.now()];
         fetchMetadataProc.running = true;
+    }
+
+    function readLocalFingerprint() {
+        const value = (localVersionFile.text() || "").trim();
+        root.localFingerprint = value.length > 0 ? value.split("\n")[0].trim() : "Unknown";
+        console.log("[UpdateService] Local fingerprint path: " + root.localVersionPath);
+        console.log("[UpdateService] Local Fingerprint: " + root.localFingerprint);
     }
 
     function normalizeVersion(value) {
@@ -103,19 +111,18 @@ Singleton {
         }
     }
 
-    Process {
-        id: readLocalProc
-        command: ["cat", Directories.shellConfig + "/version"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const value = (text || "").trim();
-                root.localFingerprint = value.length > 0 ? value : "Unknown";
-                console.log("[UpdateService] Local Fingerprint: " + root.localFingerprint);
-            }
+    FileView {
+        id: localVersionFile
+        path: root.localVersionPath
+        watchChanges: true
+        onFileChanged: {
+            reload();
+            root.readLocalFingerprint();
         }
-        onExited: (exitCode) => {
-            if (exitCode !== 0)
-                root.localFingerprint = "Unknown";
+        onLoaded: root.readLocalFingerprint()
+        onLoadFailed: {
+            root.localFingerprint = "Unknown";
+            console.warn("[UpdateService] Could not read local fingerprint: " + root.localVersionPath);
         }
     }
 

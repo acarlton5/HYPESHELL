@@ -123,6 +123,7 @@ ContentMenu {
                 rowSpacing: Metrics.spacing(10)
 
                 DetailRow { label: "Installed fingerprint"; value: UpdateService.localFingerprint }
+                DetailRow { label: "Installed marker"; value: UpdateService.localVersionPath }
                 DetailRow { label: "Latest fingerprint"; value: UpdateService.remoteFingerprint }
                 DetailRow { label: "Latest version"; value: UpdateService.remoteVersion.length > 0 ? UpdateService.remoteVersion : Config.runtime.shell.version }
                 DetailRow { label: "Last checked"; value: UpdateService.lastChecked }
