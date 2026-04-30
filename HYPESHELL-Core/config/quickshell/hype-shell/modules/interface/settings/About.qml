@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.config
@@ -135,74 +136,57 @@ ContentMenu {
     ContentCard {
         cardMargin: Metrics.margin("large")
 
-        ColumnLayout {
+        RowLayout {
             Layout.fillWidth: true
-            spacing: Metrics.spacing(14)
+            spacing: Metrics.spacing(12)
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Metrics.spacing(12)
+            Rectangle {
+                Layout.preferredWidth: 48
+                Layout.preferredHeight: 48
+                radius: Metrics.radius("normal")
+                color: UpdateService.updateAvailable ? Appearance.m3colors.m3errorContainer : Appearance.m3colors.m3primaryContainer
 
-                Rectangle {
-                    Layout.preferredWidth: 48
-                    Layout.preferredHeight: 48
-                    radius: Metrics.radius("normal")
-                    color: UpdateService.updateAvailable ? Appearance.m3colors.m3errorContainer : Appearance.m3colors.m3primaryContainer
-
-                    MaterialSymbol {
-                        anchors.centerIn: parent
-                        icon: UpdateService.updateAvailable ? "new_releases" : "verified"
-                        iconSize: Metrics.iconSize(28)
-                        color: UpdateService.updateAvailable ? Appearance.m3colors.m3onErrorContainer : Appearance.m3colors.m3onPrimaryContainer
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: Metrics.spacing(3)
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: "HypeShell Update"
-                        font.pixelSize: Metrics.fontSize("large")
-                        font.weight: Font.Bold
-                        color: Appearance.m3colors.m3onSurface
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: aboutPage.updateStatusText()
-                        font.pixelSize: Metrics.fontSize("normal")
-                        color: UpdateService.updateAvailable ? Appearance.m3colors.m3error : Appearance.m3colors.m3onSurfaceVariant
-                        elide: Text.ElideRight
-                    }
-                }
-
-                StyledButton {
-                    Layout.preferredWidth: UpdateService.updateAvailable ? 132 : 116
-                    text: UpdateService.updateAvailable ? "Update" : "Check"
-                    icon: UpdateService.updateAvailable ? "system_update_alt" : "sync"
-                    secondary: !UpdateService.updateAvailable
-                    enabled: !UpdateService.busy
-                    onClicked: {
-                        if (UpdateService.updateAvailable)
-                            UpdateService.runUpdate()
-                        else
-                            UpdateService.checkForUpdates()
-                    }
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    icon: UpdateService.updateAvailable ? "new_releases" : "verified"
+                    iconSize: Metrics.iconSize(28)
+                    color: UpdateService.updateAvailable ? Appearance.m3colors.m3onErrorContainer : Appearance.m3colors.m3onPrimaryContainer
                 }
             }
 
-            GridLayout {
+            ColumnLayout {
                 Layout.fillWidth: true
-                columns: aboutPage.width > 840 ? 2 : 1
-                columnSpacing: Metrics.spacing(10)
-                rowSpacing: Metrics.spacing(10)
+                spacing: Metrics.spacing(3)
 
-                FingerprintRow { label: "Installed"; value: UpdateService.localFingerprint }
-                FingerprintRow { label: "Latest"; value: UpdateService.remoteFingerprint }
-                FingerprintRow { label: "Version"; value: UpdateService.remoteVersion.length > 0 ? UpdateService.remoteVersion : Config.runtime.shell.version }
-                FingerprintRow { label: "Last checked"; value: UpdateService.lastChecked }
+                StyledText {
+                    Layout.fillWidth: true
+                    text: "HypeShell Update"
+                    font.pixelSize: Metrics.fontSize("large")
+                    font.weight: Font.Bold
+                    color: Appearance.m3colors.m3onSurface
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: aboutPage.updateStatusText()
+                    font.pixelSize: Metrics.fontSize("normal")
+                    color: UpdateService.updateAvailable ? Appearance.m3colors.m3error : Appearance.m3colors.m3onSurfaceVariant
+                    elide: Text.ElideRight
+                }
+            }
+
+            UpdateButton {
+                Layout.preferredWidth: UpdateService.updateAvailable ? 132 : 116
+                enabled: !UpdateService.busy
+                isUpdateAvailable: UpdateService.updateAvailable
+                text: UpdateService.updateAvailable ? "Update" : "Check"
+                icon: UpdateService.updateAvailable ? "system_update_alt" : "sync"
+                onClicked: {
+                    if (UpdateService.updateAvailable)
+                        UpdateService.runUpdate()
+                    else
+                        UpdateService.checkForUpdates()
+                }
             }
         }
     }
@@ -254,37 +238,46 @@ ContentMenu {
         }
     }
 
-    component FingerprintRow: Rectangle {
-        id: fingerprintRow
-        property string label: ""
-        property string value: ""
+    component UpdateButton: Rectangle {
+        id: updateButton
+        property string text: "Check"
+        property string icon: "sync"
+        property bool isUpdateAvailable: false
 
-        Layout.fillWidth: true
-        Layout.preferredHeight: 54
-        radius: Metrics.radius("small")
-        color: Appearance.m3colors.m3surfaceContainerLow
+        signal clicked()
+
+        implicitHeight: 40
+        radius: Metrics.radius("large")
+        color: !enabled
+            ? Appearance.m3colors.m3surfaceContainerHighest
+            : isUpdateAvailable ? Appearance.m3colors.m3error : Appearance.m3colors.m3primary
+        opacity: enabled ? 1 : 0.55
 
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Metrics.margin("small")
-            spacing: Metrics.spacing(10)
+            anchors.leftMargin: Metrics.margin("normal")
+            anchors.rightMargin: Metrics.margin("normal")
+            spacing: Metrics.spacing(6)
+
+            MaterialSymbol {
+                icon: updateButton.icon
+                iconSize: Metrics.iconSize(20)
+                color: updateButton.isUpdateAvailable ? Appearance.m3colors.m3onError : Appearance.m3colors.m3onPrimary
+            }
 
             StyledText {
-                Layout.preferredWidth: 86
-                text: fingerprintRow.label
-                font.pixelSize: Metrics.fontSize("smaller")
+                text: updateButton.text
+                font.pixelSize: Metrics.fontSize("small")
                 font.weight: Font.Bold
-                color: Appearance.m3colors.m3onSurfaceVariant
-                elide: Text.ElideRight
+                color: updateButton.isUpdateAvailable ? Appearance.m3colors.m3onError : Appearance.m3colors.m3onPrimary
             }
+        }
 
-            StyledText {
-                Layout.fillWidth: true
-                text: aboutPage.display(fingerprintRow.value)
-                font.pixelSize: Metrics.fontSize("smaller")
-                color: Appearance.m3colors.m3onSurface
-                elide: Text.ElideMiddle
-            }
+        MouseArea {
+            anchors.fill: parent
+            enabled: updateButton.enabled
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ForbiddenCursor
+            onClicked: updateButton.clicked()
         }
     }
 }

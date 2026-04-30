@@ -121,8 +121,7 @@ Scope {
                 { "icon": "auto_awesome", "label": "Theme Settings", "page": 13, "source": "file://" + Directories.home + "/.config/hype/themes/" + WallpaperSlideshow.hypeThemeName + "/settings/Main.qml" },
 
                 { "header": true, "label": "Support" },
-                { "icon": "system_update_alt", "label": "Updates", "page": 14, "source": Qt.resolvedUrl("UpdateConfig.qml"), "aliases": ["update", "check for updates"] },
-                { "icon": "info", "label": "About", "page": 15, "source": Qt.resolvedUrl("About.qml") }
+                { "icon": "info", "label": "About", "page": 14, "source": Qt.resolvedUrl("About.qml"), "aliases": ["update", "updates", "check for updates"] }
             ]
 
             Rectangle {
