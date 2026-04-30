@@ -55,13 +55,25 @@ Scope {
             }
 
             property int selectedIndex: 0
+            onSelectedIndexChanged: Qt.callLater(applyPageProps)
             // Navigation helper
             function navigateTo(label) {
                 const normalized = label.toLowerCase();
                 for (var i = 0; i < menuModel.length; i++) {
-                    if (!menuModel[i].header && menuModel[i].label.toLowerCase() === normalized) {
-                        root.selectedIndex = menuModel[i].page;
-                        break;
+                    if (menuModel[i].header)
+                        continue
+
+                    if (menuModel[i].label.toLowerCase() === normalized) {
+                        root.selectedIndex = menuModel[i].page
+                        break
+                    }
+
+                    const aliases = menuModel[i].aliases || []
+                    for (var a = 0; a < aliases.length; a++) {
+                        if (String(aliases[a]).toLowerCase() === normalized) {
+                            root.selectedIndex = menuModel[i].page
+                            return
+                        }
                     }
                 }
             }
@@ -87,22 +99,30 @@ Scope {
 
             property var menuModel: [
                 { "header": true, "label": "System" },
-                { "icon": "bluetooth", "label": "Bluetooth", "page": 0, "source": Qt.resolvedUrl("BluetoothConfig.qml") },
-                { "icon": "network_wifi", "label": "Wireless", "page": 1, "source": Qt.resolvedUrl("NetworkConfig.qml") },
-                { "icon": "volume_up", "label": "Audio", "page": 2, "source": Qt.resolvedUrl("AudioConfig.qml") },
+                { "icon": "network_wifi", "label": "Wireless", "page": 0, "source": Qt.resolvedUrl("NetworkConfig.qml"), "aliases": ["network", "wifi"] },
+                { "icon": "bluetooth", "label": "Bluetooth", "page": 1, "source": Qt.resolvedUrl("BluetoothConfig.qml") },
+                { "icon": "volume_up", "label": "Audio", "page": 2, "source": Qt.resolvedUrl("AudioConfig.qml"), "aliases": ["sound"] },
 
-                { "header": true, "label": "Appearance" },
-                { "icon": "palette", "label": "Theme", "page": 3, "source": Qt.resolvedUrl("AppearanceConfig.qml") },
-                { "icon": "dark_mode", "label": "Appearance Mode", "page": 9, "source": Qt.resolvedUrl("ThemeVariantConfig.qml") },
-                { "icon": "wallpaper", "label": "Wallpapers", "page": 4, "source": Qt.resolvedUrl("WallpaperConfig.qml") },
-                { "icon": "auto_awesome", "label": "Wallbash", "page": 10, "source": Qt.resolvedUrl("WallbashConfig.qml") },
+                { "header": true, "label": "Interface" },
+                { "icon": "palette", "label": "Look & Feel", "page": 3, "source": Qt.resolvedUrl("AppearanceConfig.qml"), "aliases": ["appearance", "theme", "appearance mode", "wallpaper", "wallpapers", "wallbash"] },
+                { "icon": "dock_to_bottom", "label": "Bar", "page": 4, "source": Qt.resolvedUrl("BarConfig.qml") },
+                { "icon": "search", "label": "Launcher", "page": 5, "source": Qt.resolvedUrl("LauncherConfig.qml") },
+                { "icon": "notifications", "label": "Notifications", "page": 6, "source": Qt.resolvedUrl("NotificationConfig.qml"), "aliases": ["overlays", "osd"] },
+                { "icon": "keyboard", "label": "Keybindings", "page": 7, "source": Qt.resolvedUrl("KeybindsConfig.qml"), "aliases": ["keys", "shortcuts"] },
+
+                { "header": true, "label": "Extensions" },
+                { "icon": "extension", "label": "Modules", "page": 8, "source": Qt.resolvedUrl("ModulesConfig.qml"), "props": { "viewMode": "modules" } },
+                { "icon": "widgets", "label": "Gadgets", "page": 9, "source": Qt.resolvedUrl("ModulesConfig.qml"), "props": { "viewMode": "gadgets" } },
+                { "icon": "deployed_code", "label": "Plugins", "page": 10, "source": Qt.resolvedUrl("Plugins.qml") },
+                { "icon": "storefront", "label": "Store", "page": 11, "source": Qt.resolvedUrl("Store.qml"), "aliases": ["hype store", "hypestore"] },
+                { "icon": "dashboard_customize", "label": "DSS Systems", "page": 12, "source": Qt.resolvedUrl("DssWorkspaceConfig.qml"), "aliases": ["dss"] },
 
                 { "header": true, "label": "Theme Specific" },
-                // These will be dynamically injected or pointed to the theme folder
-                { "icon": "auto_awesome", "label": "Theme Settings", "page": 5, "source": "file://" + Directories.home + "/.config/hype/themes/" + WallpaperSlideshow.hypeThemeName + "/settings/Main.qml" },
+                { "icon": "auto_awesome", "label": "Theme Settings", "page": 13, "source": "file://" + Directories.home + "/.config/hype/themes/" + WallpaperSlideshow.hypeThemeName + "/settings/Main.qml" },
 
                 { "header": true, "label": "Support" },
-                { "icon": "info", "label": "About", "page": 11, "source": Qt.resolvedUrl("About.qml") }
+                { "icon": "system_update_alt", "label": "Updates", "page": 14, "source": Qt.resolvedUrl("UpdateConfig.qml"), "aliases": ["update", "check for updates"] },
+                { "icon": "info", "label": "About", "page": 15, "source": Qt.resolvedUrl("About.qml") }
             ]
 
             Rectangle {
@@ -160,7 +180,7 @@ Scope {
                     // Sidebar
                     Rectangle {
                         Layout.fillHeight: true
-                        Layout.preferredWidth: 84
+                        Layout.preferredWidth: 220
                         color: MaterialColors.colors.surface_container_low
                         
                         ColumnLayout {
@@ -177,8 +197,22 @@ Scope {
 
                                 delegate: Item {
                                     width: parent.width
-                                    height: modelData.header ? 10 : 52
+                                    height: modelData.header ? 30 : 48
                                     visible: true
+
+                                    StyledText {
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.bottom: parent.bottom
+                                        anchors.leftMargin: 8
+                                        anchors.rightMargin: 8
+                                        visible: modelData.header
+                                        text: modelData.label || ""
+                                        font.pixelSize: Metrics.fontSize("smaller")
+                                        font.weight: Font.Bold
+                                        color: MaterialColors.colors.on_surface_variant
+                                        elide: Text.ElideRight
+                                    }
 
                                     // Item Delegate
                                     StyledRect {
@@ -188,11 +222,27 @@ Scope {
                                         color: root.selectedIndex === modelData.page ? MaterialColors.colors.secondary_container : "transparent"
                                         radius: 12
 
-                                        MaterialSymbol {
-                                            anchors.centerIn: parent
-                                            icon: modelData.icon || ""
-                                            iconSize: 24
-                                            color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 12
+                                            anchors.rightMargin: 10
+                                            spacing: Metrics.spacing(10)
+
+                                            MaterialSymbol {
+                                                Layout.preferredWidth: 28
+                                                icon: modelData.icon || ""
+                                                iconSize: 22
+                                                color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
+                                            }
+
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                text: modelData.label || ""
+                                                font.pixelSize: Metrics.fontSize("small")
+                                                font.weight: root.selectedIndex === modelData.page ? Font.Bold : Font.Medium
+                                                color: root.selectedIndex === modelData.page ? MaterialColors.colors.on_secondary_container : MaterialColors.colors.on_surface
+                                                elide: Text.ElideRight
+                                            }
                                         }
 
                                         MouseArea {
