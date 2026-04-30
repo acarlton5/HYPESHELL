@@ -23,7 +23,7 @@ Item {
 
     Flickable {
         anchors.fill: parent
-        contentHeight: contentLayout.implicitHeight + 140
+        contentHeight: contentLayout.implicitHeight + Metrics.margin("verylarge")
         clip: true
         ScrollBar.vertical: ScrollBar { }
 
@@ -39,25 +39,29 @@ Item {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Metrics.spacing(4)
+                spacing: Metrics.spacing(6)
 
                 StyledText {
+                    Layout.fillWidth: true
                     text: "HYPESHELL"
                     font.pixelSize: Metrics.fontSize("hugeass")
                     font.weight: Font.Black
                     color: Appearance.m3colors.m3primary
+                    elide: Text.ElideRight
                 }
 
                 StyledText {
+                    Layout.fillWidth: true
                     text: SystemDetails.username + "@" + SystemDetails.hostname
                     font.pixelSize: Metrics.fontSize("large")
                     color: Appearance.m3colors.m3onSurfaceVariant
+                    elide: Text.ElideMiddle
                 }
             }
 
             GridLayout {
                 Layout.fillWidth: true
-                columns: 2
+                columns: root.width >= 500 ? 2 : 1
                 columnSpacing: Metrics.spacing(10)
                 rowSpacing: Metrics.spacing(10)
 
@@ -71,55 +75,63 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 96
+                        Layout.preferredHeight: 104
                         radius: Metrics.radius("normal")
                         color: Appearance.m3colors.m3surfaceContainer
 
-                        MaterialSymbol {
-                            id: metricIcon
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                            anchors.leftMargin: Metrics.margin("normal")
-                            anchors.topMargin: Metrics.margin("normal")
-                            icon: modelData.icon
-                            iconSize: Metrics.iconSize(28)
-                            color: Appearance.m3colors.m3primary
-                        }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: Metrics.margin("small")
+                            spacing: Metrics.spacing(10)
 
-                        StyledText {
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: Metrics.margin("normal")
-                            anchors.rightMargin: Metrics.margin("normal")
-                            anchors.bottom: metricDetail.top
-                            text: modelData.value || "--"
-                            font.pixelSize: Metrics.fontSize("large")
-                            font.weight: Font.Bold
-                            elide: Text.ElideRight
-                        }
+                            Rectangle {
+                                Layout.preferredWidth: 44
+                                Layout.preferredHeight: 44
+                                Layout.alignment: Qt.AlignTop
+                                radius: Metrics.radius("normal")
+                                color: Appearance.m3colors.m3primaryContainer
 
-                        StyledText {
-                            id: metricDetail
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: Metrics.margin("normal")
-                            anchors.rightMargin: Metrics.margin("normal")
-                            anchors.bottom: metricLabel.top
-                            text: modelData.detail || "--"
-                            font.pixelSize: Metrics.fontSize("small")
-                            color: Appearance.m3colors.m3onSurfaceVariant
-                            elide: Text.ElideRight
-                        }
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    icon: modelData.icon
+                                    iconSize: Metrics.iconSize(25)
+                                    color: Appearance.m3colors.m3onPrimaryContainer
+                                }
+                            }
 
-                        StyledText {
-                            id: metricLabel
-                            anchors.left: parent.left
-                            anchors.bottom: parent.bottom
-                            anchors.leftMargin: Metrics.margin("normal")
-                            anchors.bottomMargin: Metrics.margin("normal")
-                            text: modelData.label
-                            font.pixelSize: Metrics.fontSize("small")
-                            color: Appearance.m3colors.m3onSurfaceVariant
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                spacing: Metrics.spacing(3)
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: modelData.label
+                                    font.pixelSize: Metrics.fontSize("small")
+                                    font.weight: Font.Bold
+                                    color: Appearance.m3colors.m3onSurfaceVariant
+                                    elide: Text.ElideRight
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: modelData.value || "--"
+                                    font.pixelSize: Metrics.fontSize("large")
+                                    font.weight: Font.Bold
+                                    color: Appearance.m3colors.m3onSurface
+                                    elide: Text.ElideRight
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: modelData.detail || "--"
+                                    font.pixelSize: Metrics.fontSize("small")
+                                    color: Appearance.m3colors.m3onSurfaceVariant
+                                    elide: Text.ElideMiddle
+                                }
+
+                                Item { Layout.fillHeight: true }
+                            }
                         }
                     }
                 }
@@ -127,7 +139,7 @@ Item {
 
             StyledRect {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 132
+                Layout.preferredHeight: root.width >= 420 ? 176 : 220
                 radius: Metrics.radius("normal")
                 color: Appearance.m3colors.m3surfaceContainer
 
@@ -149,12 +161,17 @@ Item {
                         font.pixelSize: Metrics.fontSize("small")
                         color: Appearance.m3colors.m3onSurfaceVariant
                         Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 2
                         elide: Text.ElideRight
                     }
 
-                    RowLayout {
+                    GridLayout {
                         Layout.fillWidth: true
-                        spacing: Metrics.spacing(10)
+                        Layout.topMargin: Metrics.spacing(2)
+                        columns: root.width >= 420 ? 2 : 1
+                        columnSpacing: Metrics.spacing(10)
+                        rowSpacing: Metrics.spacing(8)
 
                         StyledButton {
                             Layout.fillWidth: true
