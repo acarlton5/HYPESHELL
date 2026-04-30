@@ -20,6 +20,10 @@ ContentMenu {
             return UpdateService.status
         if (UpdateService.errorText.length > 0)
             return UpdateService.errorText
+        if (!UpdateService.remoteKnown)
+            return "Unable to compare versions"
+        if (!UpdateService.localKnown)
+            return "Installed version unknown"
         return UpdateService.updateAvailable ? "Update available" : "HypeShell is up to date"
     }
 

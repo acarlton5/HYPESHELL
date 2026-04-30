@@ -20,6 +20,10 @@ ContentMenu {
             return UpdateService.status
         if (UpdateService.errorText.length > 0)
             return UpdateService.errorText
+        if (!UpdateService.remoteKnown)
+            return "Unable to compare versions"
+        if (!UpdateService.localKnown)
+            return "Installed version unknown"
         return UpdateService.updateAvailable ? "Update available" : "HypeShell is up to date"
     }
 
@@ -88,8 +92,8 @@ ContentMenu {
                     Layout.preferredWidth: 188
                     text: "Run Update"
                     icon: "system_update_alt"
-                    enabled: !UpdateService.busy && UpdateService.updateAvailable
-                    tooltipText: UpdateService.updateAvailable ? "Run the HypeShell installer" : "No update is currently available"
+                    enabled: !UpdateService.busy && UpdateService.remoteKnown
+                    tooltipText: UpdateService.updateAvailable ? "Run the HypeShell installer" : "Re-run the current HypeShell installer"
                     onClicked: UpdateService.runUpdate()
                 }
 

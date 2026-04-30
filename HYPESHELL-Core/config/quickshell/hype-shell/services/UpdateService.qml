@@ -14,7 +14,10 @@ Singleton {
     property string lastChecked: "Never"
     property string errorText: ""
     property bool busy: status === "Checking..." || status === "Installing..."
-    property bool updateAvailable: remoteFingerprint !== "Unknown" && localFingerprint !== "Unknown" && localFingerprint !== remoteFingerprint
+    property bool remoteKnown: remoteFingerprint !== "Unknown"
+    property bool localKnown: localFingerprint !== "Unknown"
+    property bool versionUpdateAvailable: isRemoteVersionNewer()
+    property bool updateAvailable: remoteKnown && (!localKnown || localFingerprint !== remoteFingerprint || versionUpdateAvailable)
     property string status: "Idle"
     
     readonly property string fingerprintUrl: "https://raw.githubusercontent.com/acarlton5/HypeUpdater/main/fingerprint"
@@ -33,9 +36,41 @@ Singleton {
         readLocalProc.running = false;
         readLocalProc.running = true;
         fetchRemoteProc.running = false;
+        fetchRemoteProc.command = ["curl", "-fsSL", root.fingerprintUrl + "?cacheBust=" + Date.now()];
         fetchRemoteProc.running = true;
         fetchMetadataProc.running = false;
+        fetchMetadataProc.command = ["curl", "-fsSL", root.metadataUrl + "?cacheBust=" + Date.now()];
         fetchMetadataProc.running = true;
+    }
+
+    function normalizeVersion(value) {
+        return String(value || "").trim().replace(/^v/i, "").split(".").map(function(part) {
+            const parsed = parseInt(part, 10);
+            return isNaN(parsed) ? 0 : parsed;
+        });
+    }
+
+    function compareVersions(left, right) {
+        const a = normalizeVersion(left);
+        const b = normalizeVersion(right);
+        const length = Math.max(a.length, b.length);
+
+        for (let i = 0; i < length; i++) {
+            const ai = i < a.length ? a[i] : 0;
+            const bi = i < b.length ? b[i] : 0;
+            if (ai < bi)
+                return -1;
+            if (ai > bi)
+                return 1;
+        }
+
+        return 0;
+    }
+
+    function isRemoteVersionNewer() {
+        if (!remoteVersion || remoteVersion.length === 0)
+            return false;
+        return compareVersions(Config.runtime.shell.version, remoteVersion) < 0;
     }
 
     function runUpdate() {
