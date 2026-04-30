@@ -95,7 +95,7 @@ Singleton {
 
     Process {
         id: readLocalProc
-        command: ["cat", Directories.home + "/.config/hype/version"]
+        command: ["cat", Directories.shellConfig + "/version"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const value = (text || "").trim();
