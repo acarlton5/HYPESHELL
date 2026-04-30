@@ -34,7 +34,7 @@ export CLR_ERR="\033[1;31m"
 export CLR_INFO="\033[1;34m"
 export CLR_WARN="\033[1;33m"
 
-export BUILD_FINGERPRINT="HYPE-20260430-UPDATE-ONLY-FIX"
+export BUILD_FINGERPRINT="HYPE-20260430-PRESERVE-USER-CONTENT"
 mkdir -p "$HOME/.config/hype"
 echo "$BUILD_FINGERPRINT" > "$HOME/.config/hype/version"
 
@@ -408,6 +408,7 @@ run_hypeshell_update_only() {
     local payload_config=""
     local quickshell_target="$CONFIG_HOME/quickshell/hype-shell"
     local backup="$BACKUP_ROOT/hype-shell.update.$(date +%Y%m%d-%H%M%S)"
+    local preserve_dirs=(gadgets modules plugins themes store wallbash)
 
     mkdir -p "$update_root" "$CONFIG_HOME/quickshell" "$HYPE_CONFIG" "$BACKUP_ROOT"
     rm -rf "$repo_dir"
@@ -447,13 +448,45 @@ run_hypeshell_update_only() {
         rsync -a \
             --exclude '/config/configuration.json' \
             --exclude '/version' \
+            --exclude '/gadgets/***' \
+            --exclude '/modules/***' \
+            --exclude '/plugins/***' \
+            --exclude '/themes/***' \
+            --exclude '/store/***' \
+            --exclude '/wallbash/***' \
             "$payload_config/hype/" "$HYPE_CONFIG/"
+
+        local user_dir
+        for user_dir in "${preserve_dirs[@]}"; do
+            if [[ -d "$payload_config/hype/$user_dir" ]]; then
+                mkdir -p "$HYPE_CONFIG/$user_dir"
+                rsync -a --ignore-existing "$payload_config/hype/$user_dir/" "$HYPE_CONFIG/$user_dir/"
+            fi
+        done
     else
         local saved_config="$update_root/configuration.json"
         local saved_version="$update_root/version"
         [[ -f "$HYPE_CONFIG/config/configuration.json" ]] && cp "$HYPE_CONFIG/config/configuration.json" "$saved_config"
         [[ -f "$HYPE_CONFIG/version" ]] && cp "$HYPE_CONFIG/version" "$saved_version"
-        cp -a "$payload_config/hype/." "$HYPE_CONFIG/"
+
+        shopt -s dotglob nullglob
+        local item
+        for item in "$payload_config/hype/"*; do
+            local name
+            name="$(basename "$item")"
+
+            case "$name" in
+                gadgets|modules|plugins|themes|store|wallbash)
+                    mkdir -p "$HYPE_CONFIG/$name"
+                    cp -an "$item/." "$HYPE_CONFIG/$name/"
+                    ;;
+                *)
+                    cp -a "$item" "$HYPE_CONFIG/"
+                    ;;
+            esac
+        done
+        shopt -u dotglob nullglob
+
         [[ -f "$saved_config" ]] && mkdir -p "$HYPE_CONFIG/config" && cp "$saved_config" "$HYPE_CONFIG/config/configuration.json"
         [[ -f "$saved_version" ]] && cp "$saved_version" "$HYPE_CONFIG/version"
     fi
