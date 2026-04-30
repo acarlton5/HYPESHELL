@@ -13,6 +13,7 @@ Singleton {
     property string remoteUpdatedAt: ""
     property string lastChecked: "Never"
     property string errorText: ""
+    property int lastInstallExitCode: 0
     property bool busy: status === "Checking..." || status === "Installing..."
     property bool remoteKnown: remoteFingerprint !== "Unknown"
     property bool localKnown: localFingerprint !== "Unknown"
@@ -76,20 +77,29 @@ Singleton {
     function runUpdate() {
         console.log("[UpdateService] Executing one-click installer...");
         root.status = "Installing...";
+        root.errorText = "";
         Quickshell.execDetached(["notify-send", "Hype Shell", "Update starting...", "--urgency=normal"]);
         
         updateProc.running = false;
-        updateProc.command = ["bash", "-c", "curl -fsSL " + installerUrl + " | bash"];
+        updateProc.command = ["bash", "-lc", "set -o pipefail; curl -fsSL '" + installerUrl + "?cacheBust=" + Date.now() + "' | bash"];
         updateProc.running = true;
     }
 
     Process {
         id: updateProc
-        onExited: {
-            console.log("[UpdateService] Installer finished.");
+        onExited: (exitCode) => {
+            root.lastInstallExitCode = exitCode;
             root.status = "Idle";
-            Quickshell.execDetached(["notify-send", "Hype Shell", "Update process completed.", "--urgency=normal"]);
-            checkForUpdates();
+            console.log("[UpdateService] Installer finished with exit code: " + exitCode);
+
+            if (exitCode === 0) {
+                Quickshell.execDetached(["notify-send", "Hype Shell", "Update installed. Reloading HypeShell...", "--urgency=normal"]);
+                checkForUpdates();
+                Quickshell.execDetached(["bash", "-lc", "nohup bash -lc 'sleep 1; killall qs quickshell 2>/dev/null || true; if command -v qs >/dev/null 2>&1; then exec qs -c hype-shell; else exec quickshell -c hype-shell; fi' >/dev/null 2>&1 &"]);
+            } else {
+                root.errorText = "Installer failed with exit code " + exitCode + ".";
+                Quickshell.execDetached(["notify-send", "Hype Shell", root.errorText, "--urgency=critical"]);
+            }
         }
     }
 
