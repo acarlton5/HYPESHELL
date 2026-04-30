@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.config
@@ -88,54 +87,6 @@ ContentMenu {
     ContentCard {
         cardMargin: Metrics.margin("large")
 
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Metrics.spacing(14)
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Metrics.spacing(10)
-
-                MaterialSymbol {
-                    icon: "terminal"
-                    iconSize: Metrics.iconSize(24)
-                    color: Appearance.m3colors.m3primary
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: "System"
-                    font.pixelSize: Metrics.fontSize("large")
-                    font.weight: Font.Bold
-                    color: Appearance.m3colors.m3onSurface
-                }
-            }
-
-            GridLayout {
-                Layout.fillWidth: true
-                columns: aboutPage.width > 900 ? 3 : (aboutPage.width > 560 ? 2 : 1)
-                columnSpacing: Metrics.spacing(10)
-                rowSpacing: Metrics.spacing(10)
-
-                InfoTile { label: "OS"; value: aboutPage.display(SystemDetails.osName); icon: "desktop_windows" }
-                InfoTile { label: "Kernel"; value: aboutPage.display(SystemDetails.kernelVersion); icon: "memory" }
-                InfoTile { label: "Arch"; value: aboutPage.display(SystemDetails.architecture); icon: "developer_board" }
-                InfoTile { label: "Uptime"; value: aboutPage.display(SystemDetails.uptime); icon: "schedule" }
-                InfoTile { label: "Processes"; value: String(SystemDetails.runningProcesses || "--"); icon: "account_tree" }
-                InfoTile { label: "Users"; value: String(SystemDetails.loggedInUsers || "--"); icon: "group" }
-                InfoTile { label: "CPU"; value: aboutPage.display(SystemDetails.cpuLoad) + " / " + aboutPage.display(SystemDetails.cpuTemp); icon: "speed" }
-                InfoTile { label: "RAM"; value: aboutPage.display(SystemDetails.ramUsage); icon: "memory_alt" }
-                InfoTile { label: "Disk"; value: aboutPage.display(SystemDetails.diskUsage); icon: "hard_drive" }
-                InfoTile { label: "Swap"; value: aboutPage.display(SystemDetails.swapUsage); icon: "swap_horiz" }
-                InfoTile { label: "IP"; value: aboutPage.display(SystemDetails.ipAddress); icon: "lan" }
-                InfoTile { label: "Quickshell"; value: aboutPage.display(SystemDetails.qsVersion); icon: "bolt" }
-            }
-        }
-    }
-
-    ContentCard {
-        cardMargin: Metrics.margin("large")
-
         RowLayout {
             Layout.fillWidth: true
             spacing: Metrics.spacing(12)
@@ -187,6 +138,54 @@ ContentMenu {
                     else
                         UpdateService.checkForUpdates()
                 }
+            }
+        }
+    }
+
+    ContentCard {
+        cardMargin: Metrics.margin("large")
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: Metrics.spacing(14)
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Metrics.spacing(10)
+
+                MaterialSymbol {
+                    icon: "terminal"
+                    iconSize: Metrics.iconSize(24)
+                    color: Appearance.m3colors.m3primary
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: "System"
+                    font.pixelSize: Metrics.fontSize("large")
+                    font.weight: Font.Bold
+                    color: Appearance.m3colors.m3onSurface
+                }
+            }
+
+            GridLayout {
+                Layout.fillWidth: true
+                columns: aboutPage.width > 900 ? 3 : (aboutPage.width > 560 ? 2 : 1)
+                columnSpacing: Metrics.spacing(10)
+                rowSpacing: Metrics.spacing(10)
+
+                InfoTile { label: "OS"; value: aboutPage.display(SystemDetails.osName); icon: "desktop_windows" }
+                InfoTile { label: "Kernel"; value: aboutPage.display(SystemDetails.kernelVersion); icon: "memory" }
+                InfoTile { label: "Arch"; value: aboutPage.display(SystemDetails.architecture); icon: "developer_board" }
+                InfoTile { label: "Uptime"; value: aboutPage.display(SystemDetails.uptime); icon: "schedule" }
+                InfoTile { label: "Processes"; value: String(SystemDetails.runningProcesses || "--"); icon: "account_tree" }
+                InfoTile { label: "Users"; value: String(SystemDetails.loggedInUsers || "--"); icon: "group" }
+                InfoTile { label: "CPU"; value: aboutPage.display(SystemDetails.cpuLoad) + " / " + aboutPage.display(SystemDetails.cpuTemp); icon: "speed" }
+                InfoTile { label: "RAM"; value: aboutPage.display(SystemDetails.ramUsage); icon: "memory_alt" }
+                InfoTile { label: "Disk"; value: aboutPage.display(SystemDetails.diskUsage); icon: "hard_drive" }
+                InfoTile { label: "Swap"; value: aboutPage.display(SystemDetails.swapUsage); icon: "swap_horiz" }
+                InfoTile { label: "IP"; value: aboutPage.display(SystemDetails.ipAddress); icon: "lan" }
+                InfoTile { label: "Quickshell"; value: aboutPage.display(SystemDetails.qsVersion); icon: "bolt" }
             }
         }
     }

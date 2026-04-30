@@ -34,7 +34,7 @@ export CLR_ERR="\033[1;31m"
 export CLR_INFO="\033[1;34m"
 export CLR_WARN="\033[1;33m"
 
-export BUILD_FINGERPRINT="HYPE-20260430-ABOUT-UPDATE-FIX"
+export BUILD_FINGERPRINT="HYPE-20260430-ABOUT-TOP-UPDATE"
 mkdir -p "$HOME/.config/hype"
 echo "$BUILD_FINGERPRINT" > "$HOME/.config/hype/version"
 
