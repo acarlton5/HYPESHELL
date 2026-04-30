@@ -34,7 +34,7 @@ export CLR_ERR="\033[1;31m"
 export CLR_INFO="\033[1;34m"
 export CLR_WARN="\033[1;33m"
 
-export BUILD_FINGERPRINT="HYPE-20260430-INSTALLER-STATUS-FIX"
+export BUILD_FINGERPRINT="HYPE-20260430-UPDATE-ONLY-FIX"
 mkdir -p "$HOME/.config/hype"
 echo "$BUILD_FINGERPRINT" > "$HOME/.config/hype/version"
 
@@ -398,6 +398,70 @@ ensure_hypeshell_payload() {
 
 command_exists() {
     command -v "$1" &>/dev/null
+}
+
+run_hypeshell_update_only() {
+    print_status "Running HypeShell update-only install..."
+
+    local update_root="$HYPE_CACHE/update"
+    local repo_dir="$update_root/repo"
+    local payload_config=""
+    local quickshell_target="$CONFIG_HOME/quickshell/hype-shell"
+    local backup="$BACKUP_ROOT/hype-shell.update.$(date +%Y%m%d-%H%M%S)"
+
+    mkdir -p "$update_root" "$CONFIG_HOME/quickshell" "$HYPE_CONFIG" "$BACKUP_ROOT"
+    rm -rf "$repo_dir"
+
+    if command_exists git; then
+        print_status "Fetching latest HypeShell from $HYPESHELL_CORE_REPO_URL..."
+        git clone --depth 1 --branch "$HYPESHELL_CORE_BRANCH" "$HYPESHELL_CORE_REPO_URL" "$repo_dir"
+    else
+        print_status "git not found; fetching latest HypeShell archive..."
+        local archive="$update_root/hypeshell.tar.gz"
+        curl -fsSL "$HYPESHELL_GITHUB_BASE/$HYPESHELL_CORE_REPO/archive/refs/heads/$HYPESHELL_CORE_BRANCH.tar.gz" -o "$archive"
+        mkdir -p "$repo_dir"
+        tar -xzf "$archive" -C "$repo_dir" --strip-components=1
+    fi
+
+    if [[ -d "$repo_dir/$HYPESHELL_CORE_PATH/config/quickshell/hype-shell" && -d "$repo_dir/$HYPESHELL_CORE_PATH/config/hype" ]]; then
+        payload_config="$repo_dir/$HYPESHELL_CORE_PATH/config"
+    elif [[ -d "$repo_dir/config/quickshell/hype-shell" && -d "$repo_dir/config/hype" ]]; then
+        payload_config="$repo_dir/config"
+    else
+        print_err "Fetched HypeShell payload did not contain expected config folders."
+        exit 1
+    fi
+
+    if [[ -d "$quickshell_target" ]]; then
+        print_status "Backing up current shell to $backup"
+        mkdir -p "$(dirname "$backup")"
+        cp -a "$quickshell_target" "$backup"
+    fi
+
+    print_status "Updating Quickshell shell files..."
+    rm -rf "$quickshell_target"
+    cp -a "$payload_config/quickshell/hype-shell" "$CONFIG_HOME/quickshell/"
+
+    print_status "Updating HypeShell support files..."
+    if command_exists rsync; then
+        rsync -a \
+            --exclude '/config/configuration.json' \
+            --exclude '/version' \
+            "$payload_config/hype/" "$HYPE_CONFIG/"
+    else
+        local saved_config="$update_root/configuration.json"
+        local saved_version="$update_root/version"
+        [[ -f "$HYPE_CONFIG/config/configuration.json" ]] && cp "$HYPE_CONFIG/config/configuration.json" "$saved_config"
+        [[ -f "$HYPE_CONFIG/version" ]] && cp "$HYPE_CONFIG/version" "$saved_version"
+        cp -a "$payload_config/hype/." "$HYPE_CONFIG/"
+        [[ -f "$saved_config" ]] && mkdir -p "$HYPE_CONFIG/config" && cp "$saved_config" "$HYPE_CONFIG/config/configuration.json"
+        [[ -f "$saved_version" ]] && cp "$saved_version" "$HYPE_CONFIG/version"
+    fi
+
+    find "$quickshell_target/scripts" -type f -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+    printf '%s\n' "$BUILD_FINGERPRINT" > "$HYPE_CONFIG/version"
+
+    print_ok "HypeShell update-only install completed."
 }
 
 pkg_installed() {
@@ -1500,6 +1564,13 @@ final_notes() {
 # =============================================================================
 
 print_banner
+
+if [[ "${HYPESHELL_UPDATE_ONLY:-}" == "1" || ! -t 1 ]]; then
+    ensure_user_path
+    run_hypeshell_update_only
+    exit 0
+fi
+
 require_installed_arch_os
 ensure_user_path
 check_usb_layout

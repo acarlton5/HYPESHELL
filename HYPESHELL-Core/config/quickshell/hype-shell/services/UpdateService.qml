@@ -81,7 +81,7 @@ Singleton {
         Quickshell.execDetached(["notify-send", "Hype Shell", "Update starting...", "--urgency=normal"]);
         
         updateProc.running = false;
-        updateProc.command = ["bash", "-lc", "set -o pipefail; curl -fsSL '" + installerUrl + "?cacheBust=" + Date.now() + "' | bash"];
+        updateProc.command = ["bash", "-lc", "set -o pipefail; curl -fsSL '" + installerUrl + "?cacheBust=" + Date.now() + "' | HYPESHELL_UPDATE_ONLY=1 bash"];
         updateProc.running = true;
     }
 
