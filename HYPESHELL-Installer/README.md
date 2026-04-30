@@ -3,8 +3,8 @@
 Bootstrap installer for fresh Arch Linux systems.
 
 ### 🚀 Build Status
-**Current Fingerprint:** `HYPE-20260426-0141-ROLLBACK`  
-**Last Update:** Rolled back Bar logic to a stable state.
+**Current Fingerprint:** `HYPE-20260430-ABOUT-UPDATER`
+**Last Update:** Added the About system dashboard and HypeUpdater fingerprint check.
 
 This folder is intentionally small. It installs the base Hyprland/Quickshell stack, then fetches the runtime payload from `HYPESHELL-Core` in the `acarlton5/HYPESHELL` monorepo.
 

@@ -136,6 +136,6 @@
     "shell": {
         "qsVersion": "0.0.0",
         "releaseChannel": "stable",
-        "version": "0.7.7"
+        "version": "0.7.8"
     }
 }

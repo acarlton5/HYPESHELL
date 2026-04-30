@@ -94,7 +94,6 @@ ShellRoot {
         StoreWindow { }
     }
     Ipc { }
-    UpdateNotifier { }
     PluginHost { }
     ScreenCapture{ }
     PolkitAgent { }

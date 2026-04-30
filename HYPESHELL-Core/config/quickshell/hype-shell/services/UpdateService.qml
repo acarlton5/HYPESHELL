@@ -9,10 +9,17 @@ Singleton {
 
     property string localFingerprint: "Unknown"
     property string remoteFingerprint: "Unknown"
-    property bool updateAvailable: remoteFingerprint !== "Unknown" && localFingerprint !== remoteFingerprint
+    property string remoteVersion: ""
+    property string remoteUpdatedAt: ""
+    property string lastChecked: "Never"
+    property string errorText: ""
+    property bool busy: status === "Checking..." || status === "Installing..."
+    property bool updateAvailable: remoteFingerprint !== "Unknown" && localFingerprint !== "Unknown" && localFingerprint !== remoteFingerprint
     property string status: "Idle"
     
-    readonly property string remoteUrl: "https://raw.githubusercontent.com/acarlton5/HYPESHELL/main/HYPESHELL-Installer/install.sh"
+    readonly property string fingerprintUrl: "https://raw.githubusercontent.com/acarlton5/HypeUpdater/main/fingerprint"
+    readonly property string metadataUrl: "https://raw.githubusercontent.com/acarlton5/HypeUpdater/main/latest.json"
+    readonly property string installerUrl: "https://raw.githubusercontent.com/acarlton5/HYPESHELL/main/HYPESHELL-Installer/install.sh"
 
     Component.onCompleted: {
         console.log("[UpdateService] Loaded and ready.");
@@ -22,10 +29,13 @@ Singleton {
     function checkForUpdates() {
         console.log("[UpdateService] Checking fingerprints...");
         root.status = "Checking...";
+        root.errorText = "";
         readLocalProc.running = false;
         readLocalProc.running = true;
         fetchRemoteProc.running = false;
         fetchRemoteProc.running = true;
+        fetchMetadataProc.running = false;
+        fetchMetadataProc.running = true;
     }
 
     function runUpdate() {
@@ -34,7 +44,7 @@ Singleton {
         Quickshell.execDetached(["notify-send", "Hype Shell", "Update starting...", "--urgency=normal"]);
         
         updateProc.running = false;
-        updateProc.command = ["bash", "-c", "curl -fsSL " + remoteUrl + " | bash"];
+        updateProc.command = ["bash", "-c", "curl -fsSL " + installerUrl + " | bash"];
         updateProc.running = true;
     }
 
@@ -53,30 +63,51 @@ Singleton {
         command: ["cat", Directories.home + "/.config/hype/version"]
         stdout: StdioCollector {
             onStreamFinished: {
-                root.localFingerprint = (text || "").trim();
+                const value = (text || "").trim();
+                root.localFingerprint = value.length > 0 ? value : "Unknown";
                 console.log("[UpdateService] Local Fingerprint: " + root.localFingerprint);
+            }
+        }
+        onExited: (exitCode) => {
+            if (exitCode !== 0)
+                root.localFingerprint = "Unknown";
+        }
+    }
+
+    Process {
+        id: fetchRemoteProc
+        command: ["curl", "-fsSL", fingerprintUrl]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const value = (text || "").trim().split("\n")[0].trim();
+                root.remoteFingerprint = value.length > 0 ? value : "Unknown";
+                root.lastChecked = new Date().toLocaleString();
+                console.log("[UpdateService] Remote Fingerprint: " + root.remoteFingerprint);
+                if (root.status === "Checking...") root.status = "Idle";
+            }
+        }
+        onExited: (exitCode) => {
+            if (exitCode !== 0) {
+                root.remoteFingerprint = "Unknown";
+                root.errorText = "Could not reach HypeUpdater.";
                 if (root.status === "Checking...") root.status = "Idle";
             }
         }
     }
 
     Process {
-        id: fetchRemoteProc
-        command: ["curl", "-fsSL", remoteUrl]
+        id: fetchMetadataProc
+        command: ["curl", "-fsSL", metadataUrl]
         stdout: StdioCollector {
             onStreamFinished: {
-                const lines = text.split("\n");
-                for (var i = 0; i < lines.length; i++) {
-                    if (lines[i].indexOf("export BUILD_FINGERPRINT=") !== -1) {
-                        const parts = lines[i].split('"');
-                        if (parts.length >= 2) {
-                            root.remoteFingerprint = parts[1];
-                            console.log("[UpdateService] Remote Fingerprint: " + root.remoteFingerprint);
-                        }
-                        break;
-                    }
+                try {
+                    const data = JSON.parse(text || "{}");
+                    root.remoteVersion = data.version || "";
+                    root.remoteUpdatedAt = data.updatedAt || "";
+                } catch (e) {
+                    root.remoteVersion = "";
+                    root.remoteUpdatedAt = "";
                 }
-                if (root.status === "Checking...") root.status = "Idle";
             }
         }
     }

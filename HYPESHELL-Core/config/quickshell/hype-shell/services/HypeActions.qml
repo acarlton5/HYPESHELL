@@ -66,8 +66,8 @@ Singleton {
     // Update Logic (Centralized)
     function runUpdate() {
         console.log("[HypeActions] Starting update...");
-        Quickshell.execDetached(["notify-send", "Hype Shell", "Starting one-click update..."]);
-        Quickshell.execDetached(["bash", "-c", "curl -fsSL https://raw.githubusercontent.com/acarlton5/HYPESHELL/main/HYPESHELL-Installer/install.sh | bash"]);
+        if (UpdateService)
+            UpdateService.runUpdate();
     }
 
     function refreshUpdateStatus() {
