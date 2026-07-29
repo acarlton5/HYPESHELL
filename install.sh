@@ -725,25 +725,24 @@ install_primary_file_manager() {
         if pacman -Q dolphin >/dev/null 2>&1; then
             sudo_run pacman -Rns --noconfirm dolphin
         fi
-        if ! have thunar; then
-            sudo_run pacman -S --needed --noconfirm thunar
-        fi
+        sudo_run pacman -S --needed --noconfirm thunar gvfs thunar-volman tumbler ffmpegthumbnailer poppler-glib webp-pixbuf-loader
     elif have dnf; then
         if rpm -q dolphin >/dev/null 2>&1; then
             sudo_run dnf remove -y dolphin
         fi
-        have thunar || sudo_run dnf install -y thunar
+        sudo_run dnf install -y thunar gvfs thunar-volman tumbler ffmpegthumbnailer
     elif have apt-get; then
         if dpkg-query -W -f='${Status}' dolphin 2>/dev/null | grep -q 'install ok installed'; then
             sudo_run apt-get purge -y dolphin
             sudo_run apt-get autoremove -y
         fi
-        have thunar || { sudo_run apt-get update; sudo_run apt-get install -y thunar; }
+        sudo_run apt-get update
+        sudo_run apt-get install -y thunar gvfs thunar-volman tumbler ffmpegthumbnailer
     elif have zypper; then
         if rpm -q dolphin >/dev/null 2>&1; then
             sudo_run zypper --non-interactive remove --clean-deps dolphin
         fi
-        have thunar || sudo_run zypper --non-interactive install thunar
+        sudo_run zypper --non-interactive install thunar gvfs thunar-volman tumbler ffmpegthumbnailer
     fi
 
     if have xdg-mime; then
