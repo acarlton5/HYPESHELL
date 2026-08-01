@@ -167,6 +167,9 @@ EOF
 
 echo "Installing HypeShell..."
 make -C "$tmp/source" PREFIX="/usr/local" install
+install -D -m 755 "$tmp/source/quickshell/Modules/Greetd/assets/hype-greeter" /usr/local/bin/hype-greeter
+install -D -m 755 "$tmp/source/quickshell/Modules/Greetd/assets/hype-greeter" /usr/bin/hype-greeter
+install -D -m 755 "$tmp/source/assets/sessions/hypeshell-hyprland-session" /usr/local/bin/hypeshell-hyprland-session
 install -D -m 644 "$tmp/install-fingerprint" "/usr/local/share/hypeshell/install-fingerprint"
 
 hardware_profile="generic"
