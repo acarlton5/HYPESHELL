@@ -102,7 +102,10 @@ Rectangle {
             iconColor: Theme.surfaceText
             backgroundColor: "transparent"
             tooltipText: I18n.tr("Select screenshot")
-            onClicked: root.screenshotRequested()
+            onClicked: {
+                PopoutService.closeControlCenter();
+                Qt.callLater(() => Quickshell.execDetached(["/usr/local/bin/hype", "screenshot"]));
+            }
         }
 
         HypeActionButton {
