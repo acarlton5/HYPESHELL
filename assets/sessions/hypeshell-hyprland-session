@@ -4,7 +4,13 @@ set -euo pipefail
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
 HYPE_DIR="$CONFIG_DIR/hype"
-CONFIG_FILE="${HYPESHELL_HYPRLAND_CONFIG:-$CONFIG_DIR/hyprland.conf}"
+if [ -n "${HYPESHELL_HYPRLAND_CONFIG:-}" ]; then
+    CONFIG_FILE="$HYPESHELL_HYPRLAND_CONFIG"
+elif [ -f "$CONFIG_DIR/hyprland.lua" ]; then
+    CONFIG_FILE="$CONFIG_DIR/hyprland.lua"
+else
+    CONFIG_FILE="$CONFIG_DIR/hyprland.conf"
+fi
 DEFAULT_DIR="${HYPESHELL_HYPRLAND_DEFAULTS:-/usr/local/share/hypeshell/hyprland}"
 export PATH="/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
