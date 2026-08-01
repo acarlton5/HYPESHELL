@@ -13,6 +13,7 @@ Rectangle {
 
     signal powerButtonClicked
     signal lockRequested
+    signal screenshotRequested
     signal editModeToggled
     signal settingsButtonClicked
 
@@ -92,6 +93,17 @@ Rectangle {
             iconColor: Theme.surfaceText
             backgroundColor: "transparent"
             onClicked: root.powerButtonClicked()
+        }
+
+        HypeActionButton {
+            buttonSize: 36
+            buttonSize: 36
+            iconName: "photo_camera"
+            iconSize: Theme.iconSize - 4
+            iconColor: Theme.surfaceText
+            backgroundColor: "transparent"
+            tooltipText: I18n.tr("Select screenshot")
+            onClicked: root.screenshotRequested()
         }
 
         HypeActionButton {

@@ -236,6 +236,11 @@ HypePopout {
                             root.close();
                             root.lockRequested();
                         }
+                        onScreenshotRequested: {
+                            root.close();
+                            Quickshell.execDetached(["hype", "screenshot"]);
+
+                        }
                         onSettingsButtonClicked: {
                             root.close();
                         }
