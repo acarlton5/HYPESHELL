@@ -238,7 +238,7 @@ HypePopout {
                         }
                         onScreenshotRequested: {
                             root.close();
-                            Quickshell.execDetached(["hype", "screenshot"]);
+                            Qt.callLater(() => Quickshell.execDetached(["/usr/local/bin/hype", "screenshot"]));
 
                         }
                         onSettingsButtonClicked: {
