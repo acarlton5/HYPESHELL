@@ -26,6 +26,13 @@ HypePopout {
 
     signal lockRequested
 
+    Timer {
+        id: screenshotLaunchTimer
+        interval: 300
+        repeat: false
+        onTriggered: Quickshell.execDetached(["/usr/local/bin/hype", "screenshot"])
+    }
+
     function _maxPopupHeight() {
         const screenHeight = (triggerScreen?.height ?? 1080);
         return screenHeight - 100;
@@ -239,7 +246,7 @@ HypePopout {
                         }
                         onScreenshotRequested: {
                             root.close();
-                            Qt.callLater(() => Quickshell.execDetached(["/usr/local/bin/hype", "screenshot"]));
+                            screenshotLaunchTimer.restart();
 
                         }
                         onSettingsButtonClicked: {
