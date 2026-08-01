@@ -307,27 +307,21 @@ NIRI_EOF
             echo "Error: neither 'hypeshell-hyprland-session' nor 'Hyprland' was found in PATH" >&2
             exit 1
         fi
-        if [[ -z "$COMPOSITOR_CONFIG" ]]; then
-            TEMP_CONFIG=$(mktemp)
-            cat > "$TEMP_CONFIG" << HYPRLAND_EOF
-env = HYPE_RUN_GREETER,1
-
-misc {
-    disable_hyprland_logo = true
-}
-
-exec-once = sh -c "$QS_CMD; hyprctl dispatch exit"
-HYPRLAND_EOF
-            COMPOSITOR_CONFIG="$TEMP_CONFIG"
-        else
-            TEMP_CONFIG=$(mktemp)
-            cat "$COMPOSITOR_CONFIG" > "$TEMP_CONFIG"
-            cat >> "$TEMP_CONFIG" << HYPRLAND_EOF
-
-exec-once = sh -c "$QS_CMD; hyprctl dispatch exit"
-HYPRLAND_EOF
-            COMPOSITOR_CONFIG="$TEMP_CONFIG"
-        fi
+        # Hyprland 0.55+ deprecates the legacy .conf format.
+        # Generate the greeter's temporary config as Lua as well.
+        TEMP_CONFIG=$(mktemp --suffix=.lua)
+        cat > "$TEMP_CONFIG" << HYPRLAND_LUA_EOF
+hl.env("HYPE_RUN_GREETER", "1")
+hl.config({
+    misc = {
+        disable_hyprland_logo = true,
+    },
+})
+hl.on("hyprland.start", function()
+    hl.exec_cmd([[${QS_CMD}; hyprctl dispatch exit]])
+end)
+HYPRLAND_LUA_EOF
+        COMPOSITOR_CONFIG="$TEMP_CONFIG"
         if command -v hypeshell-hyprland-session >/dev/null 2>&1; then
             exec_compositor "hyprland" hypeshell-hyprland-session -- --config "$COMPOSITOR_CONFIG"
         elif command -v start-hyprland >/dev/null 2>&1; then
