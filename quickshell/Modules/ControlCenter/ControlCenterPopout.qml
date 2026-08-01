@@ -30,7 +30,7 @@ HypePopout {
         id: screenshotLaunchTimer
         interval: 300
         repeat: false
-        onTriggered: Quickshell.execDetached(["/usr/local/bin/hype", "screenshot"])
+        onTriggered: Quickshell.execDetached(["/usr/local/bin/hype", "screenshot", "--reset"])
     }
 
     function _maxPopupHeight() {
