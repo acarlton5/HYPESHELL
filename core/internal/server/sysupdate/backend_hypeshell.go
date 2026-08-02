@@ -170,6 +170,11 @@ make -C "$tmp/source" PREFIX="/usr/local" install
 install -D -m 755 "$tmp/source/quickshell/Modules/Greetd/assets/hype-greeter" /usr/local/bin/hype-greeter
 install -D -m 755 "$tmp/source/quickshell/Modules/Greetd/assets/hype-greeter" /usr/bin/hype-greeter
 install -D -m 755 "$tmp/source/assets/sessions/hypeshell-hyprland-session" /usr/local/bin/hypeshell-hyprland-session
+if ! cmp -s "$tmp/source/quickshell/Modules/Greetd/assets/hype-greeter" /usr/local/bin/hype-greeter || ! cmp -s "$tmp/source/quickshell/Modules/Greetd/assets/hype-greeter" /usr/bin/hype-greeter || ! cmp -s "$tmp/source/assets/sessions/hypeshell-hyprland-session" /usr/local/bin/hypeshell-hyprland-session; then
+    echo "Error: HypeShell asset installation verification failed." >&2
+    echo "The binary may be updated, but the greeter/session scripts were not replaced." >&2
+    exit 1
+fi
 install -D -m 644 "$tmp/install-fingerprint" "/usr/local/share/hypeshell/install-fingerprint"
 
 hardware_profile="generic"
