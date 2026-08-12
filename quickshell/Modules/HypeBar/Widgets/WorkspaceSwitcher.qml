@@ -595,7 +595,7 @@ Item {
             break;
         case "hyprland":
             if (data.id)
-                Hyprland.dispatch(`workspace ${data.id}`);
+                HyprlandService.focusWorkspace(data.id);
             break;
         case "dwl":
             if (data.tag !== undefined)
@@ -683,7 +683,7 @@ Item {
                 return;
             }
 
-            Hyprland.dispatch(`workspace ${realWorkspaces[nextIndex].id}`);
+            HyprlandService.focusWorkspace(realWorkspaces[nextIndex].id);
         } else if (CompositorService.isDwl) {
             const realWorkspaces = getRealWorkspaces();
             if (realWorkspaces.length < 2) {
@@ -1320,7 +1320,7 @@ Item {
                                     NiriService.switchToWorkspace(modelData.idx);
                                 }
                             } else if (CompositorService.isHyprland && modelData?.id) {
-                                Hyprland.dispatch(`workspace ${modelData.id}`);
+                                HyprlandService.focusWorkspace(modelData.id);
                             } else if (CompositorService.isDwl && modelData?.tag !== undefined) {
                                 DwlService.switchToTag(root.screenName, modelData.tag);
                             } else if ((CompositorService.isSway || CompositorService.isScroll || CompositorService.isMiracle) && modelData?.num) {

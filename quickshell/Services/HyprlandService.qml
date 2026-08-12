@@ -20,12 +20,32 @@ Singleton {
     readonly property string windowrulesPath: hyprHypeDir + "/windowrules.conf"
 
     property int _lastGapValue: -1
+    property int _workspaceRequestSerial: 0
 
     Component.onCompleted: {
         if (CompositorService.isHyprland) {
             Qt.callLater(generateLayoutConfig);
             ensureWindowrulesConfig();
         }
+    }
+
+    function focusWorkspace(workspaceId) {
+        const id = Number(workspaceId);
+        if (!Number.isInteger(id) || id <= 0)
+            return false;
+
+        const requestId = "hypr-focus-workspace-" + (++_workspaceRequestSerial);
+        const nativeDispatcher = `hl.dsp.focus({ workspace = ${id} })`;
+        Proc.runCommand(requestId, ["hyprctl", "dispatch", nativeDispatcher], (output, exitCode) => {
+            if (exitCode === 0)
+                return;
+            // Compatibility for installations still using hyprland.conf.
+            Proc.runCommand(requestId + "-legacy", ["hyprctl", "dispatch", "workspace", String(id)], (legacyOutput, legacyExitCode) => {
+                if (legacyExitCode !== 0)
+                    log.warn("Failed to switch to workspace", id, legacyOutput || output);
+            });
+        });
+        return true;
     }
 
     function ensureWindowrulesConfig() {
