@@ -718,6 +718,35 @@ install_visualizer_dependency() {
     install_package_if_available cava || echo "Warning: could not install cava automatically; audio visualizers may be disabled." >&2
 }
 
+install_power_profile_dependency() {
+    hardware_profile="$(detect_hardware_profile)"
+
+    if [ "$hardware_profile" = "apple-silicon" ]; then
+        echo "Installing Apple Silicon power profile backend (tuned-ppd)..."
+        install_package_if_available tuned-ppd || {
+            echo "Warning: tuned-ppd is unavailable; HypeBar power profiles will be disabled." >&2
+            return 0
+        }
+        sudo_run systemctl enable --now tuned.service
+        sudo_run systemctl enable --now tuned-ppd.service
+        sudo_run systemctl is-active --quiet tuned.service tuned-ppd.service || {
+            echo "Error: Apple Silicon power profile services failed to start." >&2
+            return 1
+        }
+    else
+        echo "Installing standard power profile backend (power-profiles-daemon)..."
+        install_package_if_available power-profiles-daemon || {
+            echo "Warning: power-profiles-daemon is unavailable; HypeBar power profiles will be disabled." >&2
+            return 0
+        }
+        sudo_run systemctl enable --now power-profiles-daemon.service
+        sudo_run systemctl is-active --quiet power-profiles-daemon.service || {
+            echo "Error: power-profiles-daemon failed to start." >&2
+            return 1
+        }
+    fi
+}
+
 install_primary_file_manager() {
     # HypeShell uses Thunar. Remove Dolphin and its now-unused dependency tree;
     # package managers will retain anything still required by KDE Connect.
@@ -889,13 +918,16 @@ verify_hypeshell_source_payload() {
     for required in \
         "$SOURCE_DIR/quickshell/shell.qml" \
         "$SOURCE_DIR/core/Makefile" \
-        "$SOURCE_DIR/core/internal/config/embedded/hyprland.conf" \
-        "$SOURCE_DIR/core/internal/config/embedded/hypr-colors.conf" \
-        "$SOURCE_DIR/core/internal/config/embedded/hypr-layout.conf" \
-        "$SOURCE_DIR/core/internal/config/embedded/hypr-binds.conf" \
+        "$SOURCE_DIR/core/internal/config/embedded/hyprland.lua" \
+        "$SOURCE_DIR/core/internal/config/embedded/hypr-colors.lua" \
+        "$SOURCE_DIR/core/internal/config/embedded/hypr-layout.lua" \
+        "$SOURCE_DIR/core/internal/config/embedded/hypr-binds.lua" \
+        "$SOURCE_DIR/core/internal/config/embedded/hypr-outputs.lua" \
+        "$SOURCE_DIR/core/internal/config/embedded/hypr-cursor.lua" \
+        "$SOURCE_DIR/core/internal/config/embedded/hypr-windowrules.lua" \
         "$SOURCE_DIR/quickshell/Modules/Greetd/assets/hype-greeter" \
         "$SOURCE_DIR/assets/sessions/hypeshell-hyprland.desktop" \
-        "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.conf" \
+        "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.lua" \
         "$SOURCE_DIR/quickshell/PLUGINS/hypeAgLauncher/plugin.json" \
         "$SOURCE_DIR/quickshell/PLUGINS/hypeAgLauncher/plugin.qml" \
         "$SOURCE_DIR/quickshell/PLUGINS/hypeAgLauncher/AccountSettings.qml" \
@@ -951,103 +983,67 @@ install_hyprland_session() {
     sudo_run install -D -m 755 "$SOURCE_DIR/assets/sessions/hypeshell-hyprland-session" "$PREFIX/bin/hypeshell-hyprland-session"
     sudo_run sed -i 's/\r$//' "$PREFIX/bin/hypeshell-hyprland-session" || true
     sudo_run install -D -m 644 "$SOURCE_DIR/assets/sessions/hypeshell-hyprland.desktop" "$PREFIX/share/wayland-sessions/hypeshell-hyprland.desktop"
-    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hyprland.conf" "$defaults_dir/hyprland.conf"
-    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-colors.conf" "$defaults_dir/hype/colors.conf"
-    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-layout.conf" "$defaults_dir/hype/layout.conf"
-    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-binds.conf" "$defaults_dir/hype/binds.conf"
+    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hyprland.lua" "$defaults_dir/hyprland.lua"
+    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-colors.lua" "$defaults_dir/hype/colors.lua"
+    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-layout.lua" "$defaults_dir/hype/layout.lua"
+    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-binds.lua" "$defaults_dir/hype/binds.lua"
     if [ "$detected_hardware_profile" = "apple-silicon" ]; then
-        sudo_run install -D -m 644 "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.conf" "$defaults_dir/hype/hardware.conf"
+        sudo_run install -D -m 644 "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.lua" "$defaults_dir/hype/hardware.lua"
     else
-        sudo_run install -D -m 644 /dev/null "$defaults_dir/hype/hardware.conf"
+        sudo_run install -D -m 644 /dev/null "$defaults_dir/hype/hardware.lua"
     fi
 
-    sudo_run install -D -m 644 /dev/null "$defaults_dir/hype/outputs.conf"
-    sudo_run install -D -m 644 /dev/null "$defaults_dir/hype/cursor.conf"
-    sudo_run install -D -m 644 /dev/null "$defaults_dir/hype/windowrules.conf"
+    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-outputs.lua" "$defaults_dir/hype/outputs.lua"
+    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-cursor.lua" "$defaults_dir/hype/cursor.lua"
+    sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-windowrules.lua" "$defaults_dir/hype/windowrules.lua"
 }
 
 ensure_hyprland_shell_startup() {
     [ "$INSTALL_HYPRLAND_SESSION" -eq 1 ] || return 0
 
     config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
-    config_file="$config_dir/hyprland.conf"
+    config_file="$config_dir/hyprland.lua"
     hype_config_dir="$config_dir/hype"
-    legacy_config_dir="$config_dir/hype"
-    startup_line="exec-once = systemctl --user start hype.service || hype run"
+    defaults_dir="$PREFIX/share/hypeshell/hyprland"
     detected_hardware_profile="$(detect_hardware_profile)"
 
-    # Recent Hyprland releases may leave an autogenerated Lua config beside
-    # HypeShell's explicit .conf file. Suppress its full-screen warning if a
-    # user starts Hyprland without the HypeShell session wrapper.
-    lua_config_file="$config_dir/hyprland.lua"
-    if [ -f "$lua_config_file" ]; then
-        run sed -i '/hl\.config({[[:space:]]*autogenerated[[:space:]]*=[[:space:]]*true[[:space:]]*})/d' "$lua_config_file"
-    fi
-
     if [ "$YES" -eq 0 ]; then
-        run mkdir -p "$config_dir"
-        echo "[dry-run] ensure $config_file starts HypeShell with: $startup_line"
+        run mkdir -p "$hype_config_dir"
+        echo "[dry-run] seed native Hyprland Lua configuration for $detected_hardware_profile"
         return 0
     fi
 
-    mkdir -p "$config_dir"
     mkdir -p "$hype_config_dir"
-    if [ -f "$hype_config_dir/binds.conf" ]; then
-        sed -i -e '/switch:on:Apple SMC power\/lid events/d' -e '/switch:off:Apple SMC power\/lid events/d' "$hype_config_dir/binds.conf"
-    fi
+
     if [ "$detected_hardware_profile" = "apple-silicon" ]; then
-        cp "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.conf" "$hype_config_dir/hardware.conf"
+        cp "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.lua" "$hype_config_dir/hardware.lua"
     else
-        : > "$hype_config_dir/hardware.conf"
+        : > "$hype_config_dir/hardware.lua"
     fi
-    if [ -d "$legacy_config_dir" ]; then
-        for config_name in colors.conf outputs.conf layout.conf cursor.conf binds.conf windowrules.conf; do
-            if [ -e "$legacy_config_dir/$config_name" ] && [ ! -e "$hype_config_dir/$config_name" ]; then
-                cp "$legacy_config_dir/$config_name" "$hype_config_dir/$config_name"
+
+    for config_name in colors.lua layout.lua binds.lua; do
+        target="$hype_config_dir/$config_name"
+        if [ ! -s "$target" ]; then
+            if [ -r "$defaults_dir/hype/$config_name" ]; then
+                cp "$defaults_dir/hype/$config_name" "$target"
+            elif [ -r "$SOURCE_DIR/core/internal/config/embedded/hypr-${config_name}" ]; then
+                cp "$SOURCE_DIR/core/internal/config/embedded/hypr-${config_name}" "$target"
             fi
-        done
-    fi
+        fi
+    done
+
+    touch "$hype_config_dir/outputs.lua" "$hype_config_dir/cursor.lua" "$hype_config_dir/windowrules.lua"
 
     if [ ! -s "$config_file" ]; then
-        default_config="$PREFIX/share/hypeshell/hyprland/hyprland.conf"
-        if [ -r "$default_config" ]; then
-            cp "$default_config" "$config_file"
-        elif [ -n "$SOURCE_DIR" ] && [ -r "$SOURCE_DIR/core/internal/config/embedded/hyprland.conf" ]; then
-            cp "$SOURCE_DIR/core/internal/config/embedded/hyprland.conf" "$config_file"
+        if [ -r "$defaults_dir/hyprland.lua" ]; then
+            cp "$defaults_dir/hyprland.lua" "$config_file"
+        elif [ -r "$SOURCE_DIR/core/internal/config/embedded/hyprland.lua" ]; then
+            cp "$SOURCE_DIR/core/internal/config/embedded/hyprland.lua" "$config_file"
         fi
     fi
 
-    if [ -f "$config_file" ] && grep -q 'source = \./hype/' "$config_file"; then
-        cp "$config_file" "$config_file.hypeshell-pre-paths.bak"
-        sed -i -e 's#source = \./hype/#source = ./hype/#g' "$config_file"
-    fi
-
-    if [ -f "$hype_config_dir/binds.conf" ] && { grep -q '{{TERMINAL_COMMAND}}' "$hype_config_dir/binds.conf" || grep -q 'hype ipc call' "$hype_config_dir/binds.conf" || grep -q 'hype clipboard copy' "$hype_config_dir/binds.conf"; }; then
-        cp "$hype_config_dir/binds.conf" "$hype_config_dir/binds.conf.hypeshell-pre-command-repair.bak"
-        sed -i \
-            -e 's/{{TERMINAL_COMMAND}}/kitty/g' \
-            -e 's/hype ipc call/hype ipc call/g' \
-            -e 's/hype clipboard copy/hype clipboard copy/g' \
-            "$hype_config_dir/binds.conf"
-    fi
-
-    if [ -f "$config_file" ] && ! grep -Eq '(^|[[:space:]])(hype run|hype\.service)' "$config_file"; then
-        cp "$config_file" "$config_file.hypeshell-pre-startup.bak"
-        if grep -Eq '(^|[[:space:]])(hype run|hype\.service)' "$config_file"; then
-            sed -i \
-                -e 's/systemctl --user start hype\.service/systemctl --user start hype.service/g' \
-                -e 's/\bhype run\b/hype run/g' \
-                -e 's#source = \./hype/#source = ./hype/#g' \
-                "$config_file"
-            return 0
-        fi
-        {
-            printf '\n# HypeShell startup\n'
-            printf '%s\n' "$startup_line"
-        } >> "$config_file"
-    fi
-    if [ -f "$config_file" ] && ! grep -Fq 'source = ./hype/hardware.conf' "$config_file"; then
-        printf '\nsource = ./hype/hardware.conf\n' >> "$config_file"
+    if [ -f "$hype_config_dir/binds.lua" ] && grep -q "{{TERMINAL_COMMAND}}" "$hype_config_dir/binds.lua"; then
+        sed -i "s/{{TERMINAL_COMMAND}}/kitty/g" "$hype_config_dir/binds.lua"
     fi
 }
 
@@ -1065,6 +1061,7 @@ install_hype() {
     install_qt_wayland_dependency
     install_terminal_dependency
     install_visualizer_dependency
+    install_power_profile_dependency
     install_primary_file_manager
 
     run make -C "$SOURCE_DIR" build

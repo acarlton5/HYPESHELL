@@ -104,6 +104,8 @@ Rectangle {
                     text: {
                         if (!BatteryService.batteryAvailable)
                             return I18n.tr("Power profile management available");
+                        if (BatteryService.estimateRecalculating)
+                            return I18n.tr("Recalculating battery estimate…");
                         const time = BatteryService.formatTimeRemaining();
                         if (time !== "Unknown") {
                             return BatteryService.isCharging ? I18n.tr("Time until full: %1").arg(time) : I18n.tr("Time remaining: %1").arg(time);

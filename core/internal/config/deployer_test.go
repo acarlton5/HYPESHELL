@@ -87,132 +87,43 @@ func getGhosttyPath() string {
 }
 
 func TestMergeHyprlandMonitorSections(t *testing.T) {
-	cd := &ConfigDeployer{}
+	logChan := make(chan string, 10)
+	cd := NewConfigDeployer(logChan)
 
-	tests := []struct {
-		name            string
-		newConfig       string
-		existingConfig  string
-		wantError       bool
-		wantContains    []string
-		wantNotContains []string
-	}{
-		{
-			name: "no existing monitors",
-			newConfig: `# ==================
-# MONITOR CONFIG
-# ==================
-# monitor = eDP-2, 2560x1600@239.998993, 2560x0, 1, vrr, 1
+	t.Run("convert legacy monitors to Lua module", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		newConfig := `-- native config`
+		existingConfig := `monitor = DP-1, 1920x1080@144, 0x0, 1
+monitor = HDMI-A-1, 3840x2160@60, 1920x0, 1.5`
 
-# ==================
-# ENVIRONMENT VARS
-# ==================
-env = XDG_CURRENT_DESKTOP,niri`,
-			existingConfig: `# Some other config
-input {
-    kb_layout = us
-}`,
-			wantError:    false,
-			wantContains: []string{"MONITOR CONFIG", "ENVIRONMENT VARS"},
-		},
-		{
-			name: "merge single monitor",
-			newConfig: `# ==================
-# MONITOR CONFIG
-# ==================
-# monitor = eDP-2, 2560x1600@239.998993, 2560x0, 1, vrr, 1
+		result, err := cd.mergeHyprlandMonitorSections(newConfig, existingConfig, tmpDir)
+		require.NoError(t, err)
+		assert.Equal(t, newConfig, result)
 
-# ==================
-# ENVIRONMENT VARS
-# ==================`,
-			existingConfig: `# My config
-monitor = DP-1, 1920x1080@144, 0x0, 1
-input {
-    kb_layout = us
-}`,
-			wantError: false,
-			wantContains: []string{
-				"MONITOR CONFIG",
-				"monitor = DP-1, 1920x1080@144, 0x0, 1",
-				"Monitors from existing configuration",
-			},
-			wantNotContains: []string{
-				"monitor = eDP-2", // Example monitor should be removed
-			},
-		},
-		{
-			name: "merge multiple monitors",
-			newConfig: `# ==================
-# MONITOR CONFIG
-# ==================
-# monitor = eDP-2, 2560x1600@239.998993, 2560x0, 1, vrr, 1
+		content, err := os.ReadFile(filepath.Join(tmpDir, "outputs.lua"))
+		require.NoError(t, err)
+		assert.Contains(t, string(content), `output = "DP-1"`)
+		assert.Contains(t, string(content), `mode = "1920x1080@144"`)
+		assert.Contains(t, string(content), `output = "HDMI-A-1"`)
+	})
 
-# ==================
-# ENVIRONMENT VARS
-# ==================`,
-			existingConfig: `monitor = DP-1, 1920x1080@144, 0x0, 1
-# monitor = HDMI-A-1, 1920x1080@60, 1920x0, 1
-monitor = eDP-1, 2560x1440@165, auto, 1.25`,
-			wantError: false,
-			wantContains: []string{
-				"monitor = DP-1",
-				"# monitor = HDMI-A-1", // Commented monitor preserved
-				"monitor = eDP-1",
-				"Monitors from existing configuration",
-			},
-			wantNotContains: []string{
-				"monitor = eDP-2", // Example monitor should be removed
-			},
-		},
-		{
-			name: "preserve commented monitors",
-			newConfig: `# ==================
-# MONITOR CONFIG
-# ==================
-# monitor = eDP-2, 2560x1600@239.998993, 2560x0, 1, vrr, 1
+	t.Run("preserve native monitor blocks", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		existingConfig := `hl.monitor({
+    output = "eDP-1",
+    disabled = false,
+    mode = "preferred",
+    position = "auto",
+    scale = 2,
+})`
 
-# ==================`,
-			existingConfig: `# monitor = DP-1, 1920x1080@144, 0x0, 1
-# monitor = HDMI-A-1, 1920x1080@60, 1920x0, 1`,
-			wantError: false,
-			wantContains: []string{
-				"# monitor = DP-1",
-				"# monitor = HDMI-A-1",
-				"Monitors from existing configuration",
-			},
-		},
-		{
-			name: "no monitor config section",
-			newConfig: `# Some config without monitor section
-input {
-    kb_layout = us
-}`,
-			existingConfig: `monitor = DP-1, 1920x1080@144, 0x0, 1`,
-			wantError:      true,
-		},
-	}
+		_, err := cd.mergeHyprlandMonitorSections("-- native config", existingConfig, tmpDir)
+		require.NoError(t, err)
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tmpDir := t.TempDir()
-			result, err := cd.mergeHyprlandMonitorSections(tt.newConfig, tt.existingConfig, tmpDir)
-
-			if tt.wantError {
-				assert.Error(t, err)
-				return
-			}
-
-			require.NoError(t, err)
-
-			for _, want := range tt.wantContains {
-				assert.Contains(t, result, want, "merged config should contain: %s", want)
-			}
-
-			for _, notWant := range tt.wantNotContains {
-				assert.NotContains(t, result, notWant, "merged config should NOT contain: %s", notWant)
-			}
-		})
-	}
+		content, err := os.ReadFile(filepath.Join(tmpDir, "outputs.lua"))
+		require.NoError(t, err)
+		assert.Contains(t, string(content), existingConfig)
+	})
 }
 
 func TestHyprlandConfigDeployment(t *testing.T) {
@@ -238,9 +149,9 @@ func TestHyprlandConfigDeployment(t *testing.T) {
 
 		content, err := os.ReadFile(result.Path)
 		require.NoError(t, err)
-		assert.Contains(t, string(content), "# MONITOR CONFIG")
-		assert.Contains(t, string(content), "source = ./hype/binds.conf")
-		assert.Contains(t, string(content), "exec-once = ")
+		assert.Contains(t, string(content), "-- MONITOR CONFIG")
+		assert.Contains(t, string(content), `require("hype.binds")`)
+		assert.Contains(t, string(content), `hl.on("hyprland.start"`)
 	})
 
 	t.Run("deploy hyprland config with existing monitors", func(t *testing.T) {
@@ -252,6 +163,7 @@ general {
     gaps_in = 10
 }
 `
+		_ = os.Remove(filepath.Join(tempDir, ".config", "hypr", "hyprland.lua"))
 		hyprPath := filepath.Join(tempDir, ".config", "hypr", "hyprland.conf")
 		err := os.MkdirAll(filepath.Dir(hyprPath), 0o755)
 		require.NoError(t, err)
@@ -271,20 +183,20 @@ general {
 		require.NoError(t, err)
 		assert.Equal(t, existingContent, string(backupContent))
 
-		newContent, err := os.ReadFile(result.Path)
+		newContent, err := os.ReadFile(filepath.Join(tempDir, ".config", "hypr", "hype", "outputs.lua"))
 		require.NoError(t, err)
-		assert.Contains(t, string(newContent), "monitor = DP-1, 1920x1080@144")
-		assert.Contains(t, string(newContent), "monitor = HDMI-A-1, 3840x2160@60")
-		assert.Contains(t, string(newContent), "source = ./hype/binds.conf")
-		assert.NotContains(t, string(newContent), "monitor = eDP-2")
+		assert.Contains(t, string(newContent), `output = "DP-1"`)
+		assert.Contains(t, string(newContent), `output = "HDMI-A-1"`)
+		assert.Contains(t, string(newContent), `mode = "3840x2160@60"`)
+		assert.NotContains(t, string(newContent), `output = "eDP-2"`)
 	})
 }
 
 func TestHyprlandConfigStructure(t *testing.T) {
-	assert.Contains(t, HyprlandConfig, "# MONITOR CONFIG")
-	assert.Contains(t, HyprlandConfig, "# STARTUP APPS")
-	assert.Contains(t, HyprlandConfig, "# INPUT CONFIG")
-	assert.Contains(t, HyprlandConfig, "source = ./hype/binds.conf")
+	assert.Contains(t, HyprlandConfig, "-- MONITOR CONFIG")
+	assert.Contains(t, HyprlandConfig, "-- STARTUP APPS")
+	assert.Contains(t, HyprlandConfig, "-- INPUT CONFIG")
+	assert.Contains(t, HyprlandConfig, `require("hype.binds")`)
 }
 
 func TestGhosttyConfigStructure(t *testing.T) {

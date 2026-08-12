@@ -13,22 +13,16 @@ HypePopout {
     property var triggerScreen: null
 
     function isActiveProfile(profile) {
-        if (typeof PowerProfiles === "undefined") {
-            return false;
-        }
-
-        return PowerProfiles.profile === profile;
+        return PowerProfileWatcher.available && PowerProfileWatcher.currentProfile === profile;
     }
 
     function setProfile(profile) {
-        if (typeof PowerProfiles === "undefined") {
-            ToastService.showError(I18n.tr("power-profiles-daemon not available"));
+        if (!PowerProfileWatcher.available) {
+            ToastService.showError(I18n.tr("Power profile service not available"));
             return;
         }
-        PowerProfiles.profile = profile;
-        if (PowerProfiles.profile !== profile) {
+        if (!PowerProfileWatcher.setProfile(profile))
             ToastService.showError(I18n.tr("Failed to set power profile"));
-        }
     }
 
     popupWidth: 400
@@ -174,6 +168,8 @@ HypePopout {
                         readonly property string timeInfoText: {
                             if (!BatteryService.batteryAvailable)
                                 return I18n.tr("Power profile management available");
+                            if (BatteryService.estimateRecalculating)
+                                return I18n.tr("Recalculating battery estimate…");
                             const time = BatteryService.formatTimeRemaining();
                             if (time !== "Unknown") {
                                 return BatteryService.isCharging ? I18n.tr("Time until full: %1").arg(time) : I18n.tr("Time remaining: %1").arg(time);
@@ -526,6 +522,8 @@ HypePopout {
 
                                             StyledText {
                                                 text: {
+                                                    if (BatteryService.estimateRecalculating)
+                                                        return I18n.tr("Recalculating…");
                                                     const time = modelData.state === UPowerDeviceState.Charging ? modelData.timeToFull : modelData.state === UPowerDeviceState.Discharging && BatteryService.changeRate > 0 ? (3600 * modelData.energy) / BatteryService.changeRate : 0;
 
                                                     if (!time || time <= 0 || time > 86400)
@@ -555,9 +553,9 @@ HypePopout {
                     HypeButtonGroup {
                         id: profileButtonGroup
 
-                        property var profileModel: (typeof PowerProfiles !== "undefined") ? [PowerProfile.PowerSaver, PowerProfile.Balanced].concat(PowerProfiles.hasPerformanceProfile ? [PowerProfile.Performance] : []) : [PowerProfile.PowerSaver, PowerProfile.Balanced, PowerProfile.Performance]
+                        property var profileModel: PowerProfileWatcher.profiles
                         property int currentProfileIndex: {
-                            if (typeof PowerProfiles === "undefined")
+                            if (!PowerProfileWatcher.available)
                                 return 1;
                             return profileModel.findIndex(profile => root.isActiveProfile(profile));
                         }
@@ -583,7 +581,7 @@ HypePopout {
                     color: Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12)
                     border.color: Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.3)
                     border.width: 0
-                    visible: (typeof PowerProfiles !== "undefined") && PowerProfiles.degradationReason !== PerformanceDegradationReason.None
+                    visible: PowerProfileWatcher.available && PowerProfileWatcher.degradationReason !== PerformanceDegradationReason.None
 
                     Column {
                         id: degradationContent
@@ -617,7 +615,7 @@ HypePopout {
                                 }
 
                                 StyledText {
-                                    text: (typeof PowerProfiles !== "undefined") ? PerformanceDegradationReason.toString(PowerProfiles.degradationReason) : ""
+                                    text: PowerProfileWatcher.available ? PerformanceDegradationReason.toString(PowerProfileWatcher.degradationReason) : ""
                                     font.pixelSize: Theme.fontSizeSmall
                                     color: Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.8)
                                     wrapMode: Text.WordWrap

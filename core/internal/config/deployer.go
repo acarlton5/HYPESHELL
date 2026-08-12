@@ -64,7 +64,7 @@ func (cd *ConfigDeployer) deployConfigurationsInternal(ctx context.Context, wm d
 
 	// Primary config file paths used to detect fresh installs.
 	configPrimaryPaths := map[string]string{
-		"Hyprland":  filepath.Join(os.Getenv("HOME"), ".config", "hypr", "hyprland.conf"),
+		"Hyprland":  filepath.Join(os.Getenv("HOME"), ".config", "hypr", "hyprland.lua"),
 		"Ghostty":   filepath.Join(os.Getenv("HOME"), ".config", "ghostty", "config"),
 		"Kitty":     filepath.Join(os.Getenv("HOME"), ".config", "kitty", "kitty.conf"),
 		"Alacritty": filepath.Join(os.Getenv("HOME"), ".config", "alacritty", "alacritty.toml"),
@@ -82,6 +82,12 @@ func (cd *ConfigDeployer) deployConfigurationsInternal(ctx context.Context, wm d
 		// if the config file doesn't exist yet (fresh install scenario).
 		if primaryPath, ok := configPrimaryPaths[configType]; ok {
 			if _, err := os.Stat(primaryPath); os.IsNotExist(err) {
+				if configType == "Hyprland" {
+					legacyPath := filepath.Join(os.Getenv("HOME"), ".config", "hypr", "hyprland.conf")
+					if _, legacyErr := os.Stat(legacyPath); legacyErr == nil {
+						return false
+					}
+				}
 				return true
 			}
 		}
@@ -329,7 +335,7 @@ func (cd *ConfigDeployer) deployAlacrittyConfig() ([]DeploymentResult, error) {
 func (cd *ConfigDeployer) deployHyprlandConfig(terminal deps.Terminal, useSystemd bool) (DeploymentResult, error) {
 	result := DeploymentResult{
 		ConfigType: "Hyprland",
-		Path:       filepath.Join(os.Getenv("HOME"), ".config", "hypr", "hyprland.conf"),
+		Path:       filepath.Join(os.Getenv("HOME"), ".config", "hypr", "hyprland.lua"),
 	}
 
 	configDir := filepath.Dir(result.Path)
@@ -345,10 +351,17 @@ func (cd *ConfigDeployer) deployHyprlandConfig(terminal deps.Terminal, useSystem
 	}
 
 	var existingConfig string
-	if _, err := os.Stat(result.Path); err == nil {
+	existingPath := result.Path
+	if _, err := os.Stat(existingPath); os.IsNotExist(err) {
+		legacyPath := filepath.Join(configDir, "hyprland.conf")
+		if _, legacyErr := os.Stat(legacyPath); legacyErr == nil {
+			existingPath = legacyPath
+		}
+	}
+	if _, err := os.Stat(existingPath); err == nil {
 		cd.log("Found existing Hyprland configuration")
 
-		existingData, err := os.ReadFile(result.Path)
+		existingData, err := os.ReadFile(existingPath)
 		if err != nil {
 			result.Error = fmt.Errorf("failed to read existing config: %w", err)
 			return result, result.Error
@@ -356,7 +369,7 @@ func (cd *ConfigDeployer) deployHyprlandConfig(terminal deps.Terminal, useSystem
 		existingConfig = string(existingData)
 
 		timestamp := time.Now().Format("2006-01-02_15-04-05")
-		result.BackupPath = result.Path + ".backup." + timestamp
+		result.BackupPath = existingPath + ".backup." + timestamp
 		if err := os.WriteFile(result.BackupPath, existingData, 0o644); err != nil {
 			result.Error = fmt.Errorf("failed to create backup: %w", err)
 			return result, result.Error
@@ -412,12 +425,12 @@ func (cd *ConfigDeployer) deployHyprlandHypeConfigs(hypeDir string, terminalComm
 		name    string
 		content string
 	}{
-		{"colors.conf", HyprColorsConfig},
-		{"layout.conf", HyprLayoutConfig},
-		{"binds.conf", strings.ReplaceAll(HyprBindsConfig, "{{TERMINAL_COMMAND}}", terminalCommand)},
-		{"outputs.conf", ""},
-		{"cursor.conf", ""},
-		{"windowrules.conf", ""},
+		{"colors.lua", HyprColorsConfig},
+		{"layout.lua", HyprLayoutConfig},
+		{"binds.lua", strings.ReplaceAll(HyprBindsConfig, "{{TERMINAL_COMMAND}}", terminalCommand)},
+		{"outputs.lua", HyprOutputsConfig},
+		{"cursor.lua", HyprCursorConfig},
+		{"windowrules.lua", HyprWindowrulesConfig},
 	}
 
 	for _, cfg := range configs {
@@ -437,54 +450,48 @@ func (cd *ConfigDeployer) deployHyprlandHypeConfigs(hypeDir string, terminalComm
 }
 
 func (cd *ConfigDeployer) mergeHyprlandMonitorSections(newConfig, existingConfig, hypeDir string) (string, error) {
-	monitorRegex := regexp.MustCompile(`(?m)^#?\s*monitor\s*=.*$`)
-	existingMonitors := monitorRegex.FindAllString(existingConfig, -1)
+	var outputsContent strings.Builder
 
-	if len(existingMonitors) == 0 {
-		return newConfig, nil
-	}
-
-	outputsPath := filepath.Join(hypeDir, "outputs.conf")
-	if _, err := os.Stat(outputsPath); err != nil {
-		var outputsContent strings.Builder
-		for _, monitor := range existingMonitors {
+	if strings.Contains(existingConfig, "hl.monitor({") {
+		monitorRegex := regexp.MustCompile(`(?s)hl\.monitor\(\{.*?\n\}\)`)
+		for _, monitor := range monitorRegex.FindAllString(existingConfig, -1) {
 			outputsContent.WriteString(monitor)
 			outputsContent.WriteString("\n")
 		}
-		if err := os.WriteFile(outputsPath, []byte(outputsContent.String()), 0o644); err != nil {
-			cd.log(fmt.Sprintf("Warning: Failed to migrate monitors to %s: %v", outputsPath, err))
-		} else {
-			cd.log("Migrated monitor sections to hype/outputs.conf")
+	} else {
+		monitorRegex := regexp.MustCompile(`(?m)^#?\s*monitor\s*=.*$`)
+		for _, monitor := range monitorRegex.FindAllString(existingConfig, -1) {
+			line := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(monitor), "#"))
+			parts := strings.SplitN(strings.TrimSpace(strings.TrimPrefix(line, "monitor =")), ",", 5)
+			if len(parts) < 4 {
+				continue
+			}
+			fmt.Fprintf(&outputsContent, "hl.monitor({\n    output = %q,\n    disabled = false,\n    mode = %q,\n    position = %q,\n    scale = %q,\n})\n", strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]), strings.TrimSpace(parts[2]), strings.TrimSpace(parts[3]))
 		}
 	}
 
-	exampleMonitorRegex := regexp.MustCompile(`(?m)^# monitor = eDP-2.*$`)
-	mergedConfig := exampleMonitorRegex.ReplaceAllString(newConfig, "")
-
-	monitorHeaderRegex := regexp.MustCompile(`(?m)^# MONITOR CONFIG\n# ==================$`)
-	headerMatch := monitorHeaderRegex.FindStringIndex(mergedConfig)
-
-	if headerMatch == nil {
-		return "", fmt.Errorf("could not find MONITOR CONFIG section")
+	if outputsContent.Len() == 0 {
+		return newConfig, nil
 	}
 
-	insertPos := headerMatch[1] + 1
-
-	var builder strings.Builder
-	builder.WriteString(mergedConfig[:insertPos])
-	builder.WriteString("# Monitors from existing configuration\n")
-
-	for _, monitor := range existingMonitors {
-		builder.WriteString(monitor)
-		builder.WriteString("\n")
+	outputsPath := filepath.Join(hypeDir, "outputs.lua")
+	if info, err := os.Stat(outputsPath); err == nil && info.Size() > 0 {
+		return newConfig, nil
 	}
-
-	builder.WriteString(mergedConfig[insertPos:])
-
-	return builder.String(), nil
+	if err := os.WriteFile(outputsPath, []byte(outputsContent.String()), 0o644); err != nil {
+		return "", fmt.Errorf("failed to migrate monitors to %s: %w", outputsPath, err)
+	}
+	cd.log("Migrated monitor configuration to hype/outputs.lua")
+	return newConfig, nil
 }
 
 func (cd *ConfigDeployer) transformHyprlandConfigForNonSystemd(config, terminalCommand string) string {
+	if strings.Contains(config, "hl.on(\"hyprland.start\"") {
+		config = strings.ReplaceAll(config, "    hl.exec_cmd(\"dbus-update-activation-environment --systemd --all\")\n", "")
+		config = strings.ReplaceAll(config, "    hl.exec_cmd(\"systemctl --user start hyprland-session.target\")\n", "")
+		config = strings.ReplaceAll(config, "    hl.exec_cmd(\"systemctl --user start hype.service || hype run\")", "    hl.exec_cmd(\"hype run\")")
+		return config
+	}
 	lines := strings.Split(config, "\n")
 	var result []string
 	startupSectionFound := false

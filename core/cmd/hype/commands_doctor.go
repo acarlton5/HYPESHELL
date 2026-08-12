@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	"encoding/json"
@@ -825,7 +825,7 @@ func checkOptionalDependencies() []checkResult {
 	results = append(results, checkResult{catOptionalFeatures, "accountsservice", accountsStatus, accountsMsg, "User accounts", optionalFeaturesURL})
 
 	ppdStatus, ppdMsg := getOptionalDBusStatus("org.freedesktop.UPower.PowerProfiles")
-	results = append(results, checkResult{catOptionalFeatures, "power-profiles-daemon", ppdStatus, ppdMsg, "Power profile management", optionalFeaturesURL})
+	results = append(results, checkResult{catOptionalFeatures, "Power profile backend", ppdStatus, ppdMsg, "power-profiles-daemon or tuned-ppd", optionalFeaturesURL})
 
 	logindStatus, logindMsg := getOptionalDBusStatus("org.freedesktop.login1")
 	results = append(results, checkResult{catOptionalFeatures, "logind", logindStatus, logindMsg, "Session management", optionalFeaturesURL})

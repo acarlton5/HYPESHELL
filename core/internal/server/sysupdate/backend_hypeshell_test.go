@@ -10,8 +10,8 @@ func TestHypeShellSelfUpdateScriptHardwareProfile(t *testing.T) {
 	script := hypeShellSelfUpdateScript("1001", "testuser", "/home/testuser", "/run/user/1001", "unix:path=/run/user/1001/bus")
 	for _, expected := range []string{
 		`hardware_profile="apple-silicon"`,
-		`assets/hardware/apple-silicon/hypr-hardware.conf`,
-		`source = ./hype/hardware.conf`,
+		`assets/hardware/apple-silicon/hypr-hardware.lua`,
+		`require("hype.hardware")`,
 		`install -o "$update_user" -g "$user_group" -m 644 /dev/null "$user_hardware_file"`,
 	} {
 		if !strings.Contains(script, expected) {

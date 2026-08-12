@@ -186,11 +186,11 @@ fi
 echo "Applying HypeShell hardware profile: $hardware_profile"
 user_group="$(id -gn "$update_user")"
 user_hardware_dir="$update_home/.config/hypr/hype"
-user_hardware_file="$user_hardware_dir/hardware.conf"
-shared_hardware_file="/usr/local/share/hypeshell/hyprland/hype/hardware.conf"
+user_hardware_file="$user_hardware_dir/hardware.lua"
+shared_hardware_file="/usr/local/share/hypeshell/hyprland/hype/hardware.lua"
 install -d -o "$update_user" -g "$user_group" "$user_hardware_dir"
 if [ "$hardware_profile" = "apple-silicon" ]; then
-    hardware_source="$tmp/source/assets/hardware/apple-silicon/hypr-hardware.conf"
+    hardware_source="$tmp/source/assets/hardware/apple-silicon/hypr-hardware.lua"
     install -D -m 644 "$hardware_source" "$shared_hardware_file"
     install -o "$update_user" -g "$user_group" -m 644 "$hardware_source" "$user_hardware_file"
 else
@@ -198,8 +198,8 @@ else
     install -o "$update_user" -g "$user_group" -m 644 /dev/null "$user_hardware_file"
 fi
 
-user_hypr_config="$update_home/.config/hypr/hyprland.conf"
-hardware_source_line='source = ./hype/hardware.conf'
+user_hypr_config="$update_home/.config/hypr/hyprland.lua"
+hardware_source_line='require("hype.hardware")'
 if [ -f "$user_hypr_config" ] && ! grep -Fqx "$hardware_source_line" "$user_hypr_config"; then
     runuser -u "$update_user" -- sh -c 'printf "\n%%s\n" "$1" >> "$2"' sh "$hardware_source_line" "$user_hypr_config"
 fi

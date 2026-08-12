@@ -96,29 +96,29 @@ type hypeConfigSpec struct {
 
 var hypeConfigSpecs = map[string]hypeConfigSpec{
 	"binds": {
-		hyprFile: "binds.conf",
+		hyprFile: "binds.lua",
 		hyprContent: func(t string) string {
 			return strings.ReplaceAll(config.HyprBindsConfig, "{{TERMINAL_COMMAND}}", t)
 		},
 	},
 	"layout": {
-		hyprFile:    "layout.conf",
+		hyprFile:    "layout.lua",
 		hyprContent: func(_ string) string { return config.HyprLayoutConfig },
 	},
 	"colors": {
-		hyprFile:    "colors.conf",
+		hyprFile:    "colors.lua",
 		hyprContent: func(_ string) string { return config.HyprColorsConfig },
 	},
 	"outputs": {
-		hyprFile:    "outputs.conf",
+		hyprFile:    "outputs.lua",
 		hyprContent: func(_ string) string { return "" },
 	},
 	"cursor": {
-		hyprFile:    "cursor.conf",
+		hyprFile:    "cursor.lua",
 		hyprContent: func(_ string) string { return "" },
 	},
 	"windowrules": {
-		hyprFile:    "windowrules.conf",
+		hyprFile:    "windowrules.lua",
 		hyprContent: func(_ string) string { return "" },
 	},
 }
@@ -380,7 +380,7 @@ func checkExistingConfigs(wm deps.WindowManager, wmSelected bool, terminal deps.
 
 	if wmSelected {
 		var configPath string
-		configPath = filepath.Join(homeDir, ".config", "hypr", "hyprland.conf")
+		configPath = filepath.Join(homeDir, ".config", "hypr", "hyprland.lua")
 
 		if _, err := os.Stat(configPath); err == nil {
 			willBackup = true

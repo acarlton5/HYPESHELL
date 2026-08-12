@@ -12,6 +12,8 @@ Singleton {
     property bool suppressSound: true
     property bool previousPluggedState: false
 
+    property bool estimateRecalculating: false
+
     readonly property var scale: 100 / SettingsData.batteryChargeLimit
 
     Timer {
@@ -21,6 +23,24 @@ Singleton {
         running: true
         onTriggered: root.suppressSound = false
     }
+
+
+    Timer {
+        id: recalculationTimeout
+        interval: 45000
+        repeat: false
+        onTriggered: root.estimateRecalculating = false
+    }
+
+
+    Connections {
+        target: PowerProfileWatcher
+        function onProfileChanged() {
+            root.estimateRecalculating = true;
+            recalculationTimeout.restart();
+        }
+    }
+
 
     readonly property string preferredBatteryOverride: Quickshell.env("HYPE_PREFERRED_BATTERY")
 
@@ -37,6 +57,22 @@ Singleton {
         }
         return preferredDev || batteries[0] || null;
     }
+    Connections {
+        target: root.device
+        function onTimeToEmptyChanged() {
+            if (root.estimateRecalculating) {
+                recalculationTimeout.stop();
+                root.estimateRecalculating = false;
+            }
+        }
+        function onTimeToFullChanged() {
+            if (root.estimateRecalculating) {
+                recalculationTimeout.stop();
+                root.estimateRecalculating = false;
+            }
+        }
+    }
+
     // Whether at least one battery is available
     readonly property bool batteryAvailable: batteries.length > 0
     // Aggregated charge level (percentage)
@@ -76,12 +112,12 @@ Singleton {
 
         const profileValue = BatteryService.isPluggedIn ? SettingsData.acProfileName : SettingsData.batteryProfileName;
 
-        if (profileValue !== "") {
+        if (profileValue !== "" && PowerProfileWatcher.available) {
             const targetProfile = parseInt(profileValue);
-            if (!isNaN(targetProfile) && PowerProfiles.profile !== targetProfile) {
-                PowerProfiles.profile = targetProfile;
-            }
+            if (!isNaN(targetProfile) && PowerProfileWatcher.currentProfile !== targetProfile)
+                PowerProfileWatcher.setProfile(targetProfile);
         }
+
 
         previousPluggedState = isPluggedIn;
     }
@@ -190,9 +226,17 @@ Singleton {
             return "Unknown";
         }
 
-        let totalTime = 0;
-        totalTime = (isCharging) ? ((batteryCapacity - batteryEnergy) / changeRate) : (batteryEnergy / changeRate);
-        const avgTime = Math.abs(totalTime * 3600);
+        // Prefer UPower rolling estimate for a single/preferred battery. It is
+        // less volatile than the latest instantaneous power sample.
+        let avgTime = 0;
+        if (device && device.ready && (usePreferred || batteries.length === 1))
+            avgTime = isCharging ? device.timeToFull : device.timeToEmpty;
+
+        // Preserve energy/rate calculation for backends without an estimate.
+        if (!avgTime || avgTime <= 0) {
+            const totalTime = isCharging ? ((batteryCapacity - batteryEnergy) / changeRate) : (batteryEnergy / changeRate);
+            avgTime = Math.abs(totalTime * 3600);
+        }
         if (!avgTime || avgTime <= 0 || avgTime > 86400)
             return "Unknown";
 

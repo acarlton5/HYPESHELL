@@ -8,8 +8,10 @@ if [ -n "${HYPESHELL_HYPRLAND_CONFIG:-}" ]; then
     CONFIG_FILE="$HYPESHELL_HYPRLAND_CONFIG"
 elif [ -f "$CONFIG_DIR/hyprland.lua" ]; then
     CONFIG_FILE="$CONFIG_DIR/hyprland.lua"
-else
+elif [ -f "$CONFIG_DIR/hyprland.conf" ]; then
     CONFIG_FILE="$CONFIG_DIR/hyprland.conf"
+else
+    CONFIG_FILE="$CONFIG_DIR/hyprland.lua"
 fi
 DEFAULT_DIR="${HYPESHELL_HYPRLAND_DEFAULTS:-/usr/local/share/hypeshell/hyprland}"
 export PATH="/usr/local/bin:/usr/bin:/bin:${PATH:-}"
@@ -55,13 +57,20 @@ repair_config_placeholders() {
 }
 
 mkdir -p "$CONFIG_DIR" "$HYPE_DIR"
-seed_config "$DEFAULT_DIR/hyprland.conf" "$CONFIG_FILE"
-seed_config "$DEFAULT_DIR/hype/colors.conf" "$HYPE_DIR/colors.conf"
-seed_config "$DEFAULT_DIR/hype/layout.conf" "$HYPE_DIR/layout.conf"
-seed_config "$DEFAULT_DIR/hype/binds.conf" "$HYPE_DIR/binds.conf"
-touch "$HYPE_DIR/outputs.conf" "$HYPE_DIR/cursor.conf" "$HYPE_DIR/windowrules.conf"
+if [[ "$CONFIG_FILE" == *.lua ]]; then
+    seed_config "$DEFAULT_DIR/hyprland.lua" "$CONFIG_FILE"
+else
+    seed_config "$DEFAULT_DIR/hyprland.conf" "$CONFIG_FILE"
+fi
+seed_config "$DEFAULT_DIR/hype/colors.lua" "$HYPE_DIR/colors.lua"
+seed_config "$DEFAULT_DIR/hype/layout.lua" "$HYPE_DIR/layout.lua"
+seed_config "$DEFAULT_DIR/hype/binds.lua" "$HYPE_DIR/binds.lua"
+seed_config "$DEFAULT_DIR/hype/outputs.lua" "$HYPE_DIR/outputs.lua"
+seed_config "$DEFAULT_DIR/hype/cursor.lua" "$HYPE_DIR/cursor.lua"
+seed_config "$DEFAULT_DIR/hype/windowrules.lua" "$HYPE_DIR/windowrules.lua"
+seed_config "$DEFAULT_DIR/hype/hardware.lua" "$HYPE_DIR/hardware.lua"
 repair_config_placeholders "$CONFIG_FILE"
-repair_config_placeholders "$HYPE_DIR/binds.conf"
+repair_config_placeholders "$HYPE_DIR/binds.lua"
 
 if command -v dbus-update-activation-environment >/dev/null 2>&1; then
     dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE || true

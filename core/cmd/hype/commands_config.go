@@ -27,7 +27,7 @@ var resolveIncludeCmd = &cobra.Command{
 		case 0:
 			return []string{"hyprland"}, cobra.ShellCompDirectiveNoFileComp
 		case 1:
-			return []string{"cursor.conf", "outputs.conf", "binds.conf"}, cobra.ShellCompDirectiveNoFileComp
+			return []string{"cursor.lua", "outputs.lua", "binds.lua"}, cobra.ShellCompDirectiveNoFileComp
 		}
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
@@ -71,8 +71,10 @@ func checkHyprlandInclude(filename string) (IncludeResult, error) {
 		return IncludeResult{}, err
 	}
 
-	targetPath := filepath.Join(configDir, "hype", filename)
-	legacyTargetPath := filepath.Join(configDir, "hype", filename)
+	nativeFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + ".lua"
+	targetPath := filepath.Join(configDir, "hype", nativeFilename)
+	legacyFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + ".conf"
+	legacyTargetPath := filepath.Join(configDir, "hype", legacyFilename)
 	result := IncludeResult{}
 
 	if _, err := os.Stat(targetPath); err == nil {
@@ -81,16 +83,28 @@ func checkHyprlandInclude(filename string) (IncludeResult, error) {
 		result.Exists = true
 	}
 
-	mainConfig := filepath.Join(configDir, "hyprland.conf")
+	mainConfig := filepath.Join(configDir, "hyprland.lua")
+	if _, statErr := os.Stat(mainConfig); os.IsNotExist(statErr) {
+		mainConfig = filepath.Join(configDir, "hyprland.conf")
+	}
 	if _, err := os.Stat(mainConfig); os.IsNotExist(err) {
 		return result, nil
 	}
 
+	if strings.HasSuffix(mainConfig, ".lua") {
+		data, readErr := os.ReadFile(mainConfig)
+		if readErr != nil {
+			return result, readErr
+		}
+		module := strings.TrimSuffix(strings.ReplaceAll("hype/"+nativeFilename, "/", "."), ".lua")
+		result.Included = strings.Contains(string(data), fmt.Sprintf("require(\"%s\")", module))
+		return result, nil
+	}
 	processed := make(map[string]bool)
-	result.Included = hyprlandFindInclude(mainConfig, "hype/"+filename, processed)
+	result.Included = hyprlandFindInclude(mainConfig, "hype/"+nativeFilename, processed)
 	if !result.Included {
 		processed = make(map[string]bool)
-		result.Included = hyprlandFindInclude(mainConfig, "hype/"+filename, processed)
+		result.Included = hyprlandFindInclude(mainConfig, "hype/"+legacyFilename, processed)
 	}
 	return result, nil
 }
@@ -158,7 +172,8 @@ func checkNiriInclude(filename string) (IncludeResult, error) {
 		return IncludeResult{}, err
 	}
 
-	targetPath := filepath.Join(configDir, "hype", filename)
+	nativeFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + ".lua"
+	targetPath := filepath.Join(configDir, "hype", nativeFilename)
 	result := IncludeResult{}
 
 	if _, err := os.Stat(targetPath); err == nil {
@@ -170,8 +185,17 @@ func checkNiriInclude(filename string) (IncludeResult, error) {
 		return result, nil
 	}
 
+	if strings.HasSuffix(mainConfig, ".lua") {
+		data, readErr := os.ReadFile(mainConfig)
+		if readErr != nil {
+			return result, readErr
+		}
+		module := strings.TrimSuffix(strings.ReplaceAll("hype/"+nativeFilename, "/", "."), ".lua")
+		result.Included = strings.Contains(string(data), fmt.Sprintf("require(\"%s\")", module))
+		return result, nil
+	}
 	processed := make(map[string]bool)
-	result.Included = niriFindInclude(mainConfig, "hype/"+filename, processed)
+	result.Included = niriFindInclude(mainConfig, "hype/"+nativeFilename, processed)
 	return result, nil
 }
 
@@ -237,7 +261,8 @@ func checkMangoWCInclude(filename string) (IncludeResult, error) {
 		return IncludeResult{}, err
 	}
 
-	targetPath := filepath.Join(configDir, "hype", filename)
+	nativeFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + ".lua"
+	targetPath := filepath.Join(configDir, "hype", nativeFilename)
 	result := IncludeResult{}
 
 	if _, err := os.Stat(targetPath); err == nil {
@@ -252,8 +277,17 @@ func checkMangoWCInclude(filename string) (IncludeResult, error) {
 		return result, nil
 	}
 
+	if strings.HasSuffix(mainConfig, ".lua") {
+		data, readErr := os.ReadFile(mainConfig)
+		if readErr != nil {
+			return result, readErr
+		}
+		module := strings.TrimSuffix(strings.ReplaceAll("hype/"+nativeFilename, "/", "."), ".lua")
+		result.Included = strings.Contains(string(data), fmt.Sprintf("require(\"%s\")", module))
+		return result, nil
+	}
 	processed := make(map[string]bool)
-	result.Included = mangowcFindInclude(mainConfig, "hype/"+filename, processed)
+	result.Included = mangowcFindInclude(mainConfig, "hype/"+nativeFilename, processed)
 	return result, nil
 }
 
