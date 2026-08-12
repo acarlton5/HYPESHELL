@@ -493,13 +493,13 @@ Singleton {
 
     function powerOffMonitors() {
         if (isHyprland)
-            return Hyprland.dispatch("dpms off");
+            return Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.dpms({ action = \"disable\" })"]);
         log.warn("Cannot power off monitors without Hyprland");
     }
 
     function powerOnMonitors() {
         if (isHyprland)
-            return Hyprland.dispatch("dpms on");
+            return Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.dpms({ action = \"enable\" })"]);
         log.warn("Cannot power on monitors without Hyprland");
     }
 }

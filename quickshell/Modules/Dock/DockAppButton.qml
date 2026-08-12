@@ -164,7 +164,7 @@ Item {
         if (!specialName)
             return false;
 
-        Hyprland.dispatch("togglespecialworkspace " + specialName);
+        HyprlandService.toggleSpecialWorkspace(specialName);
         Qt.callLater(() => waylandToplevel.activate());
         return true;
     }

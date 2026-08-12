@@ -83,13 +83,13 @@ hl.bind("SUPER + SHIFT + U", hl.dsp.window.move({ workspace = "e+1" }))
 hl.bind("SUPER + U", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind("SUPER + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind("SUPER + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
-hl.bind("SUPER + CTRL + F", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 100% 100%"))
-hl.bind("SUPER + CTRL + H", hl.dsp.exec_cmd("hyprctl dispatch focusmonitor l"))
-hl.bind("SUPER + CTRL + J", hl.dsp.exec_cmd("hyprctl dispatch focusmonitor d"))
-hl.bind("SUPER + CTRL + K", hl.dsp.exec_cmd("hyprctl dispatch focusmonitor u"))
-hl.bind("SUPER + CTRL + L", hl.dsp.exec_cmd("hyprctl dispatch focusmonitor r"))
-hl.bind("SUPER + CTRL + left", hl.dsp.exec_cmd("hyprctl dispatch focusmonitor l"))
-hl.bind("SUPER + CTRL + right", hl.dsp.exec_cmd("hyprctl dispatch focusmonitor r"))
+hl.bind("SUPER + CTRL + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
+hl.bind("SUPER + CTRL + H", hl.dsp.focus({ monitor = "l" }))
+hl.bind("SUPER + CTRL + J", hl.dsp.focus({ monitor = "d" }))
+hl.bind("SUPER + CTRL + K", hl.dsp.focus({ monitor = "u" }))
+hl.bind("SUPER + CTRL + L", hl.dsp.focus({ monitor = "r" }))
+hl.bind("SUPER + CTRL + left", hl.dsp.focus({ monitor = "l" }))
+hl.bind("SUPER + CTRL + right", hl.dsp.focus({ monitor = "r" }))
 hl.bind("SUPER + End", hl.dsp.focus({ window = "last" }))
 hl.bind("SUPER + H", hl.dsp.focus({ direction = "left" }))
 hl.bind("SUPER + Home", hl.dsp.focus({ window = "first" }))
@@ -109,11 +109,11 @@ hl.bind("SUPER + SHIFT + J", hl.dsp.window.move({ direction = "down" }))
 hl.bind("SUPER + SHIFT + K", hl.dsp.window.move({ direction = "up" }))
 hl.bind("SUPER + SHIFT + L", hl.dsp.window.move({ direction = "right" }))
 hl.bind("SUPER + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
-hl.bind("SUPER + SHIFT + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 10%"), {
+hl.bind("SUPER + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), {
     repeating = true,
 })
 hl.bind("SUPER + SHIFT + left", hl.dsp.window.move({ direction = "left" }))
-hl.bind("SUPER + SHIFT + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 -10%"), {
+hl.bind("SUPER + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), {
     repeating = true,
 })
 hl.bind("SUPER + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
@@ -121,11 +121,11 @@ hl.bind("SUPER + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
 hl.bind("SUPER + code:20", hl.dsp.window.resize({ x = -100, y = 0, relative = true }))
 hl.bind("SUPER + code:21", hl.dsp.window.resize({ x = 100, y = 0, relative = true }))
 hl.bind("SUPER + down", hl.dsp.focus({ direction = "down" }))
-hl.bind("SUPER + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 10% 0"), {
+hl.bind("SUPER + equal", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), {
     repeating = true,
 })
 hl.bind("SUPER + left", hl.dsp.focus({ direction = "left" }))
-hl.bind("SUPER + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive -10% 0"), {
+hl.bind("SUPER + minus", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), {
     repeating = true,
 })
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), {
@@ -139,7 +139,11 @@ hl.bind("SUPER + up", hl.dsp.focus({ direction = "up" }))
 hl.bind("SUPER + T", hl.dsp.exec_cmd("{{TERMINAL_COMMAND}}"))
 hl.bind("SUPER + SHIFT + E", hl.dsp.exit())
 hl.bind("SUPER + P", hl.dsp.exec_cmd("hype ipc outputs cycleProfile"))
-hl.bind("SUPER + SHIFT + P", hl.dsp.dpms("toggle"))
+hl.bind("SUPER + SHIFT + P", function()
+    hl.timer(function()
+        hl.dispatch(hl.dsp.dpms({ action = "toggle" }))
+    end, { timeout = 500, type = "oneshot" })
+end)
 hl.bind("SUPER + Q", hl.dsp.window.close())
 hl.bind("SUPER + R", hl.dsp.layout("togglesplit"))
 hl.bind("SUPER + SHIFT + T", hl.dsp.window.float({ action = "toggle" }))

@@ -29,23 +29,59 @@ Singleton {
         }
     }
 
+    function _luaString(value) {
+        return JSON.stringify(String(value));
+    }
+
+    function dispatchNative(dispatcherExpression) {
+        const requestId = "hypr-native-dispatch-" + (++_workspaceRequestSerial);
+        Proc.runCommand(requestId, ["hyprctl", "dispatch", dispatcherExpression], (output, exitCode) => {
+            if (exitCode !== 0)
+                log.warn("Native Hyprland dispatch failed:", dispatcherExpression, output);
+        });
+        return true;
+    }
+
     function focusWorkspace(workspaceId) {
         const id = Number(workspaceId);
         if (!Number.isInteger(id) || id <= 0)
             return false;
+        return dispatchNative(`hl.dsp.focus({ workspace = ${id} })`);
+    }
 
-        const requestId = "hypr-focus-workspace-" + (++_workspaceRequestSerial);
-        const nativeDispatcher = `hl.dsp.focus({ workspace = ${id} })`;
-        Proc.runCommand(requestId, ["hyprctl", "dispatch", nativeDispatcher], (output, exitCode) => {
-            if (exitCode === 0)
-                return;
-            // Compatibility for installations still using hyprland.conf.
-            Proc.runCommand(requestId + "-legacy", ["hyprctl", "dispatch", "workspace", String(id)], (legacyOutput, legacyExitCode) => {
-                if (legacyExitCode !== 0)
-                    log.warn("Failed to switch to workspace", id, legacyOutput || output);
-            });
-        });
-        return true;
+    function focusWindow(address) {
+        if (!address)
+            return false;
+        const selector = String(address).startsWith("address:") ? String(address) : "address:" + address;
+        return dispatchNative(`hl.dsp.focus({ window = ${_luaString(selector)} })`);
+    }
+
+    function closeWindow(address) {
+        if (!address)
+            return false;
+        const selector = String(address).startsWith("address:") ? String(address) : "address:" + address;
+        return dispatchNative(`hl.dsp.window.close({ window = ${_luaString(selector)} })`);
+    }
+
+    function moveWindowToWorkspace(workspaceId, address, follow) {
+        const id = Number(workspaceId);
+        if (!Number.isInteger(id) || id <= 0 || !address)
+            return false;
+        const selector = String(address).startsWith("address:") ? String(address) : "address:" + address;
+        return dispatchNative(`hl.dsp.window.move({ workspace = ${id}, follow = ${follow === true}, window = ${_luaString(selector)} })`);
+    }
+
+    function renameWorkspaceById(workspaceId, name) {
+        const id = Number(workspaceId);
+        if (!Number.isInteger(id) || id <= 0)
+            return false;
+        return dispatchNative(`hl.dsp.workspace.rename({ workspace = ${id}, name = ${_luaString(name || "")} })`);
+    }
+
+    function toggleSpecialWorkspace(name) {
+        if (!name)
+            return false;
+        return dispatchNative(`hl.dsp.workspace.toggle_special(${_luaString(name)})`);
     }
 
     function ensureWindowrulesConfig() {
@@ -358,10 +394,6 @@ decoration {
         if (!wsId)
             return;
         const fullName = wsId + " " + newName;
-        Proc.runCommand("hyprland-rename-ws", ["hyprctl", "dispatch", "renameworkspace", String(wsId), fullName], (output, exitCode) => {
-            if (exitCode !== 0) {
-                log.warn("Failed to rename workspace:", output);
-            }
-        });
+        root.renameWorkspaceById(wsId, fullName);
     }
 }
