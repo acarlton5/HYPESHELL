@@ -928,9 +928,6 @@ verify_hypeshell_source_payload() {
         "$SOURCE_DIR/quickshell/Modules/Greetd/assets/hype-greeter" \
         "$SOURCE_DIR/assets/sessions/hypeshell-hyprland.desktop" \
         "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.lua" \
-        "$SOURCE_DIR/quickshell/PLUGINS/hypeAgLauncher/plugin.json" \
-        "$SOURCE_DIR/quickshell/PLUGINS/hypeAgLauncher/plugin.qml" \
-        "$SOURCE_DIR/quickshell/PLUGINS/hypeAgLauncher/AccountSettings.qml" \
         "$SOURCE_DIR/assets/sessions/hypeshell-hyprland-session"; do
         if [ ! -f "$required" ]; then
             echo "Missing required HypeShell payload: $required" >&2
