@@ -204,6 +204,19 @@ if [ -f "$user_hypr_config" ] && ! grep -Fqx "$hardware_source_line" "$user_hypr
     runuser -u "$update_user" -- sh -c 'printf "\n%%s\n" "$1" >> "$2"' sh "$hardware_source_line" "$user_hypr_config"
 fi
 
+plugin_root="$update_home/.config/HypeShell/plugins"
+if [ -d "$plugin_root" ]; then
+    echo "Updating installed HypeShell plugins..."
+    for plugin_dir in "$plugin_root"/*; do
+        [ -f "$plugin_dir/plugin.json" ] || continue
+        plugin_id="$(basename "$plugin_dir")"
+        echo "Updating plugin: $plugin_id"
+        if ! runuser -u "$update_user" -- env HOME="$update_home" XDG_CONFIG_HOME="$update_home/.config" XDG_DATA_HOME="$update_home/.local/share" XDG_STATE_HOME="$update_home/.local/state" /usr/local/bin/hype plugins update "$plugin_id"; then
+            echo "Warning: could not update plugin $plugin_id" >&2
+        fi
+    done
+fi
+
 echo "HypeShell self-update complete. Reloading service in 2 seconds..."
 if [ -n "$invoking_uid" ]; then
     (

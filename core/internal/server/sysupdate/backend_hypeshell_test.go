@@ -13,6 +13,10 @@ func TestHypeShellSelfUpdateScriptHardwareProfile(t *testing.T) {
 		`assets/hardware/apple-silicon/hypr-hardware.lua`,
 		`require("hype.hardware")`,
 		`install -o "$update_user" -g "$user_group" -m 644 /dev/null "$user_hardware_file"`,
+		`plugin_root="$update_home/.config/HypeShell/plugins"`,
+		`runuser -u "$update_user" -- env HOME="$update_home"`,
+		`/usr/local/bin/hype plugins update "$plugin_id"`,
+		`Warning: could not update plugin $plugin_id`,
 	} {
 		if !strings.Contains(script, expected) {
 			t.Fatalf("self-update script missing %q", expected)
