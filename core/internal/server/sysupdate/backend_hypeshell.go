@@ -207,23 +207,17 @@ fi
 
 echo "HypeShell self-update complete. Reloading service in 2 seconds..."
 if [ -n "$invoking_uid" ]; then
-    (
-        sleep 2
-        runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" systemctl --user daemon-reload || true
-        runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS || true
-        if ! runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" systemctl --user restart hype.service && ! runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" systemctl --user start hype.service; then
-            runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" nohup /usr/local/bin/hype run --session >/tmp/hypeshell-update-restart.log 2>&1 &
-        fi
-    ) >/dev/null 2>&1 &
+    runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" systemctl --user daemon-reload || true
+    runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS || true
+    if ! runuser -u "$update_user" -- env HOME="$update_home" XDG_RUNTIME_DIR="$xdg_runtime" DBUS_SESSION_BUS_ADDRESS="$dbus_bus" systemd-run --user --collect --on-active=2s /usr/bin/systemctl --user restart hype.service >/dev/null; then
+        echo "Warning: could not schedule the HypeShell service restart; run hype restart." >&2
+    fi
 else
-    (
-        sleep 2
-        systemctl --user daemon-reload || true
-        systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS || true
-        if ! systemctl --user restart hype.service && ! systemctl --user start hype.service; then
-            nohup /usr/local/bin/hype run --session >/tmp/hypeshell-update-restart.log 2>&1 &
-        fi
-    ) >/dev/null 2>&1 &
+    systemctl --user daemon-reload || true
+    systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS || true
+    if ! systemd-run --user --collect --on-active=2s /usr/bin/systemctl --user restart hype.service >/dev/null; then
+        echo "Warning: could not schedule the HypeShell service restart; run hype restart." >&2
+    fi
 fi
 `,
 		shellQuote(userPath),
