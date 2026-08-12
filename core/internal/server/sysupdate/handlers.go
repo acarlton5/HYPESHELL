@@ -77,12 +77,14 @@ func parseUpgradeTargets(reqParams map[string]any) []Package {
 		repo, _ := m["repo"].(string)
 		fromVersion, _ := m["fromVersion"].(string)
 		toVersion, _ := m["toVersion"].(string)
+		ref, _ := m["ref"].(string)
 		out = append(out, Package{
 			Name:        name,
 			Repo:        RepoKind(repo),
 			Backend:     backend,
 			FromVersion: fromVersion,
 			ToVersion:   toVersion,
+			Ref:         ref,
 		})
 	}
 	return out

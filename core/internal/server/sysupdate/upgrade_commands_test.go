@@ -75,6 +75,7 @@ func TestBackendHasTargetsRespectsBackendAndOptions(t *testing.T) {
 		{Name: "google-chrome", Repo: RepoAUR, Backend: "paru"},
 		{Name: "Discord", Repo: RepoFlatpak, Backend: "flatpak"},
 		{Name: "silverblue", Repo: RepoOSTree, Backend: "rpm-ostree"},
+		{Name: "Codex UI", Repo: RepoPlugin, Backend: "plugins", Ref: "hypeCodexUI"},
 	}
 
 	if !BackendHasTargets(dnfBackend{bin: "dnf5"}, targets, true, true) {
@@ -95,6 +96,10 @@ func TestBackendHasTargetsRespectsBackendAndOptions(t *testing.T) {
 	if BackendHasTargets(flatpakBackend{}, targets, true, false) {
 		t.Fatal("Flatpak target should not match when Flatpak is disabled")
 	}
+	if !BackendHasTargets(pluginsBackend{}, targets, true, true) {
+		t.Fatal("plugin target was not detected")
+	}
+
 	if !BackendHasTargets(rpmOstreeBackend{}, targets, true, true) {
 		t.Fatal("rpm-ostree target was not detected")
 	}
@@ -103,6 +108,11 @@ func TestBackendHasTargetsRespectsBackendAndOptions(t *testing.T) {
 func TestUpgradeNeedsPrivilegeSkipsFlatpakOnly(t *testing.T) {
 	backends := []Backend{dnfBackend{bin: "dnf5"}, flatpakBackend{}}
 	opts := UpgradeOptions{IncludeAUR: true, IncludeFlatpak: true}
+
+	pluginOnly := []Package{{Name: "Codex UI", Repo: RepoPlugin, Backend: "plugins", Ref: "hypeCodexUI"}}
+	if UpgradeNeedsPrivilege([]Backend{pluginsBackend{}}, pluginOnly, opts) {
+		t.Fatal("plugin-only updates should not need privileged auth")
+	}
 
 	flatpakOnly := []Package{{Name: "Discord", Repo: RepoFlatpak, Backend: "flatpak"}}
 	if UpgradeNeedsPrivilege(backends, flatpakOnly, opts) {
@@ -126,7 +136,7 @@ func TestUpgradeNeedsPrivilegeSkipsFlatpakOnly(t *testing.T) {
 func TestUpgradeBackendsFiltersFlatpakOnly(t *testing.T) {
 	sel := Selection{
 		System:  dnfBackend{bin: "dnf5"},
-		Overlay: []Backend{flatpakBackend{}},
+		Overlay: []Backend{flatpakBackend{}, pluginsBackend{}},
 	}
 	opts := UpgradeOptions{
 		IncludeAUR:     true,
@@ -139,9 +149,26 @@ func TestUpgradeBackendsFiltersFlatpakOnly(t *testing.T) {
 		t.Fatalf("upgradeBackends(flatpak-only) = %#v, want only flatpak", got)
 	}
 
+	opts.Targets = []Package{{Name: "Codex UI", Repo: RepoPlugin, Backend: "plugins", Ref: "hypeCodexUI"}}
+	got = upgradeBackends(sel, opts)
+	if len(got) != 1 || got[0].ID() != "plugins" {
+		t.Fatalf("upgradeBackends(plugin-only) = %#v, want only plugins", got)
+	}
+
+	opts.Targets = []Package{{Name: "Discord", Repo: RepoFlatpak, Backend: "flatpak"}}
 	opts.Targets = append(opts.Targets, Package{Name: "bash.x86_64", Repo: RepoSystem, Backend: "dnf5"})
 	got = upgradeBackends(sel, opts)
 	if len(got) != 2 || got[0].ID() != "dnf5" || got[1].ID() != "flatpak" {
 		t.Fatalf("upgradeBackends(mixed) = %#v, want dnf5 then flatpak", got)
+	}
+}
+
+func TestParseUpgradeTargetsPreservesPluginRef(t *testing.T) {
+	params := map[string]any{"targets": []any{map[string]any{
+		"name": "Codex UI", "repo": "plugin", "backend": "plugins", "ref": "hypeCodexUI",
+	}}}
+	targets := parseUpgradeTargets(params)
+	if len(targets) != 1 || targets[0].Ref != "hypeCodexUI" || targets[0].Repo != RepoPlugin {
+		t.Fatalf("parseUpgradeTargets() = %#v, want plugin ref preserved", targets)
 	}
 }

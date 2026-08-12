@@ -17,6 +17,7 @@ const (
 	RepoFlatpak   RepoKind = "flatpak"
 	RepoOSTree    RepoKind = "ostree"
 	RepoHypeShell RepoKind = "hypeshell"
+	RepoPlugin    RepoKind = "plugin"
 )
 
 type ErrorCode string
@@ -39,7 +40,7 @@ type Package struct {
 	ToVersion    string   `json:"toVersion,omitempty"`
 	SizeBytes    int64    `json:"sizeBytes,omitempty"`
 	ChangelogURL string   `json:"changelogUrl,omitempty"`
-	Ref          string   `json:"-"`
+	Ref          string   `json:"ref,omitempty"`
 }
 
 type BackendInfo struct {
