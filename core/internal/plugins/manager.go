@@ -639,34 +639,41 @@ func (m *Manager) findInDirByIDOrName(dir, idOrName string) (string, error) {
 }
 
 func (m *Manager) HasUpdates(pluginID string, plugin Plugin) (bool, error) {
+	current, target, err := m.UpdateRevisions(pluginID, plugin)
+	if err != nil {
+		return false, err
+	}
+	return current != target, nil
+}
+
+// UpdateRevisions returns the installed and target Git commits for a plugin.
+// Monorepo plugins use their shared repository checkout.
+func (m *Manager) UpdateRevisions(pluginID string, plugin Plugin) (string, string, error) {
 	pluginPath, err := m.findInstalledPath(pluginID)
 	if err != nil {
-		return false, fmt.Errorf("failed to find plugin: %w", err)
+		return "", "", fmt.Errorf("failed to find plugin: %w", err)
 	}
 
 	if pluginPath == "" {
-		return false, fmt.Errorf("plugin not installed: %s", pluginID)
+		return "", "", fmt.Errorf("plugin not installed: %s", pluginID)
 	}
 
 	if strings.HasPrefix(pluginPath, "/etc/xdg/quickshell/hype-plugins") {
-		return false, nil
+		return "", "", nil
 	}
 
 	metaPath := pluginPath + ".meta"
 	metaExists, err := afero.Exists(m.fs, metaPath)
 	if err != nil {
-		return false, fmt.Errorf("failed to check metadata: %w", err)
+		return "", "", fmt.Errorf("failed to check metadata: %w", err)
 	}
 
 	if metaExists {
-		// Plugin is from a monorepo, check the repo directory
 		reposDir := filepath.Join(m.pluginsDir, ".repos")
 		repoName := m.getRepoName(plugin.Repo)
 		repoPath := filepath.Join(reposDir, repoName)
-
-		return m.gitClient.HasUpdates(repoPath)
+		return m.gitClient.Revisions(repoPath)
 	}
 
-	// Plugin is a standalone repo
-	return m.gitClient.HasUpdates(pluginPath)
+	return m.gitClient.Revisions(pluginPath)
 }

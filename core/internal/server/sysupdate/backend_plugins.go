@@ -59,13 +59,15 @@ func (pluginsBackend) CheckUpdates(ctx context.Context) ([]Package, error) {
 		if !known {
 			plugin = plugins.Plugin{ID: id, Name: id}
 		}
-		hasUpdates, checkErr := manager.HasUpdates(id, plugin)
+		currentRevision, targetRevision, checkErr := manager.UpdateRevisions(id, plugin)
 		if checkErr != nil && !known {
 			continue
 		}
-		if !hasUpdates && checkErr == nil {
+		if currentRevision == targetRevision && checkErr == nil {
 			continue
 		}
+		fromVersion := shortPluginRevision(currentRevision, "missing")
+		toVersion := shortPluginRevision(targetRevision, "latest")
 		name := plugin.Name
 		if name == "" {
 			name = id
@@ -74,12 +76,21 @@ func (pluginsBackend) CheckUpdates(ctx context.Context) ([]Package, error) {
 			Name:        name,
 			Repo:        RepoPlugin,
 			Backend:     "plugins",
-			FromVersion: "installed",
-			ToVersion:   "latest",
+			FromVersion: fromVersion,
+			ToVersion:   toVersion,
 			Ref:         id,
 		})
 	}
 	return updates, nil
+}
+func shortPluginRevision(revision string, fallback string) string {
+	if revision == "" {
+		return fallback
+	}
+	if len(revision) > 12 {
+		return revision[:12]
+	}
+	return revision
 }
 
 func (pluginsBackend) Upgrade(ctx context.Context, opts UpgradeOptions, onLine func(string)) error {

@@ -26,3 +26,20 @@ func TestHypeShellSelfUpdateScriptHardwareProfile(t *testing.T) {
 		t.Fatalf("self-update script has invalid shell syntax: %v\n%s", err, output)
 	}
 }
+func TestShortPluginRevision(t *testing.T) {
+	tests := []struct {
+		revision string
+		fallback string
+		want     string
+	}{
+		{revision: "264a77a1234567890", fallback: "missing", want: "264a77a12345"},
+		{revision: "264a77a", fallback: "missing", want: "264a77a"},
+		{revision: "", fallback: "missing", want: "missing"},
+	}
+
+	for _, test := range tests {
+		if got := shortPluginRevision(test.revision, test.fallback); got != test.want {
+			t.Fatalf("shortPluginRevision(%q, %q) = %q, want %q", test.revision, test.fallback, got, test.want)
+		}
+	}
+}

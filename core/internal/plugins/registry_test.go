@@ -1,4 +1,4 @@
-﻿package plugins
+package plugins
 
 import (
 	"encoding/json"
@@ -14,6 +14,7 @@ type mockGitClient struct {
 	cloneFunc      func(path string, url string) error
 	pullFunc       func(path string) error
 	hasUpdatesFunc func(path string) (bool, error)
+	revisionsFunc  func(path string) (string, string, error)
 }
 
 func (m *mockGitClient) PlainClone(path string, url string) error {
@@ -35,6 +36,12 @@ func (m *mockGitClient) HasUpdates(path string) (bool, error) {
 		return m.hasUpdatesFunc(path)
 	}
 	return false, nil
+}
+func (m *mockGitClient) Revisions(path string) (string, string, error) {
+	if m.revisionsFunc != nil {
+		return m.revisionsFunc(path)
+	}
+	return "", "", nil
 }
 
 func TestNewRegistry(t *testing.T) {
