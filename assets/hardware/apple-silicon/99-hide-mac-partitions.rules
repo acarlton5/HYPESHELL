@@ -1,0 +1,5 @@
+# Hide Apple specific partitions from file managers
+ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_NAME}=="Macintosh HD", ENV{UDISKS_IGNORE}="1"
+ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_NAME}=="Recovery", ENV{UDISKS_IGNORE}="1"
+ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_NAME}=="EFI", ENV{UDISKS_IGNORE}="1"
+SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="apfs", ENV{UDISKS_IGNORE}="1"

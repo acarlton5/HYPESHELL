@@ -609,10 +609,13 @@ install_build_dependencies() {
     if ! have make; then
         missing="$missing make"
     fi
+    if ! have upower; then
+        missing="$missing upower"
+    fi
 
     [ -n "$missing" ] || return 0
 
-    echo "Installing HypeShell build dependencies:$missing"
+    echo "Installing HypeShell dependencies:$missing"
     if have pacman; then
         sudo_run pacman -S --needed --noconfirm $missing
     elif have apt-get; then
@@ -986,6 +989,10 @@ install_hyprland_session() {
     sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-binds.lua" "$defaults_dir/hype/binds.lua"
     if [ "$detected_hardware_profile" = "apple-silicon" ]; then
         sudo_run install -D -m 644 "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.lua" "$defaults_dir/hype/hardware.lua"
+        sudo_run install -D -m 644 "$SOURCE_DIR/assets/hardware/apple-silicon/99-hide-mac-partitions.rules" "/etc/udev/rules.d/99-hide-mac-partitions.rules"
+        sudo_run udevadm control --reload-rules || true
+        sudo_run udevadm trigger || true
+        install_package_if_available asahi-audio || true
     else
         sudo_run install -D -m 644 /dev/null "$defaults_dir/hype/hardware.lua"
     fi
