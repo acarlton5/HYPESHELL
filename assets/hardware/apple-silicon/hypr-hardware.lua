@@ -1,29 +1,24 @@
-hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd("$HOME/DevBox/quickshell_menu/toggle.sh"))
-hl.bind("switch:on:Apple SMC power/lid events", hl.dsp.exec_cmd("hype ipc call lock lock"), {
-    locked = true,
-})
-hl.bind("switch:off:Apple SMC power/lid events", function()
-    hl.timer(function()
-        hl.dispatch(hl.dsp.dpms({ action = "enable" }))
-    end, { timeout = 500, type = "oneshot" })
-end, { locked = true })
-hl.bind("switch:off:Apple SMC power/lid events", hl.dsp.exec_cmd("brightnessctl --device='kbd_backlight' set 100%"), {
-    locked = true,
-})
-
 hl.config({
+    bind = {
+        "SUPER ALT, SPACE, exec, $HOME/DevBox/quickshell_menu/toggle.sh"
+    },
+    bindl = {
+        ", switch:on:Apple SMC power/lid events, exec, hype ipc call lock lock",
+        ", switch:off:Apple SMC power/lid events, exec, hyprctl dispatch dpms on",
+        ", switch:off:Apple SMC power/lid events, exec, brightnessctl --device='kbd_backlight' set 100%"
+    },
     input = {
+        kb_options = "altwin:swap_alt_win",
         touchpad = {
             natural_scroll = true,
+            tap_to_click = true,
             clickfinger_behavior = true,
-            scroll_factor = 0.5,
         }
     },
-    gestures = {
-        workspace_swipe = true,
-        workspace_swipe_fingers = 3,
-        workspace_swipe_distance = 300,
-        workspace_swipe_invert = true,
-        workspace_swipe_create_new = true,
+    gesture = {
+        "3, horizontal, workspace",
+        "3, up, fullscreen",
+        "3, down, togglefloating",
+        "4, horizontal, workspace"
     }
 })

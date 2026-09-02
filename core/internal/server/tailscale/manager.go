@@ -119,6 +119,7 @@ func (m *Manager) watchLoop(ctx context.Context) {
 			notify, err := watcher.Next()
 			if err != nil {
 				log.Warnf("[Tailscale] IPN bus error: %v", err)
+				time.Sleep(time.Second)
 				break
 			}
 

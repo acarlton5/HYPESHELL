@@ -612,6 +612,16 @@ install_build_dependencies() {
     if ! have upower; then
         missing="$missing upower"
     fi
+    if ! have wpctl; then
+        missing="$missing wireplumber"
+    fi
+    if ! have pactl; then
+        if have pacman; then
+            missing="$missing libpulse"
+        else
+            missing="$missing pulseaudio-utils"
+        fi
+    fi
 
     [ -n "$missing" ] || return 0
 
@@ -709,6 +719,9 @@ install_terminal_dependency() {
     fi
 
     echo "Installing kitty terminal dependency..."
+    install_package_if_available bluez || true
+    install_package_if_available bluez-utils || true
+    sudo_run systemctl enable bluetooth.service || true
     install_package_if_available kitty
 }
 
@@ -989,10 +1002,13 @@ install_hyprland_session() {
     sudo_run install -D -m 644 "$SOURCE_DIR/core/internal/config/embedded/hypr-binds.lua" "$defaults_dir/hype/binds.lua"
     if [ "$detected_hardware_profile" = "apple-silicon" ]; then
         sudo_run install -D -m 644 "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.lua" "$defaults_dir/hype/hardware.lua"
+        sudo_run install -D -m 644 "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.conf" "$defaults_dir/hype/hardware.conf"
         sudo_run install -D -m 644 "$SOURCE_DIR/assets/hardware/apple-silicon/99-hide-mac-partitions.rules" "/etc/udev/rules.d/99-hide-mac-partitions.rules"
         sudo_run udevadm control --reload-rules || true
         sudo_run udevadm trigger || true
         install_package_if_available asahi-audio || true
+        install_package_if_available speakersafetyd || true
+        sudo_run systemctl enable --now speakersafetyd.service || true
     else
         sudo_run install -D -m 644 /dev/null "$defaults_dir/hype/hardware.lua"
     fi
@@ -1021,8 +1037,10 @@ ensure_hyprland_shell_startup() {
 
     if [ "$detected_hardware_profile" = "apple-silicon" ]; then
         cp "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.lua" "$hype_config_dir/hardware.lua"
+        cp "$SOURCE_DIR/assets/hardware/apple-silicon/hypr-hardware.conf" "$hype_config_dir/hardware.conf"
     else
         : > "$hype_config_dir/hardware.lua"
+        : > "$hype_config_dir/hardware.conf"
     fi
 
     for config_name in colors.lua layout.lua binds.lua; do
@@ -1060,6 +1078,7 @@ install_hype() {
     install_source_dependency
     prepare_source
 
+    ensure_aur_helper_and_flatpak
     install_build_dependencies
     install_quickshell_dependency
     install_qt_wayland_dependency
@@ -1387,6 +1406,52 @@ maybe_reboot_if_needed() {
     fi
 }
 
+ensure_aur_helper_and_flatpak() {
+    if ! have pacman; then
+        return 0
+    fi
+    if ! have flatpak; then
+        echo "Installing flatpak..."
+        sudo_run pacman -S --needed --noconfirm flatpak
+    fi
+    if ! have paru && ! have yay; then
+        echo "Installing AUR helper (paru-bin)..."
+        sudo_run pacman -S --needed --noconfirm base-devel git
+        local tmpdir
+        tmpdir="$(mktemp -d)"
+        (
+            cd "$tmpdir" || exit 1
+            git clone https://aur.archlinux.org/paru-bin.git
+            cd paru-bin || exit 1
+            makepkg -si --noconfirm
+        )
+        rm -rf "$tmpdir"
+    fi
+}
+
+ensure_audio_daemons() {
+    if ! have systemctl; then
+        return 0
+    fi
+    echo "Ensuring PipeWire audio backend is installed and running..."
+    local audio_missing=""
+    if have pacman; then
+        if ! pacman -Qi pipewire >/dev/null 2>&1; then audio_missing="$audio_missing pipewire"; fi
+        if ! pacman -Qi pipewire-pulse >/dev/null 2>&1; then audio_missing="$audio_missing pipewire-pulse"; fi
+        if ! pacman -Qi pipewire-alsa >/dev/null 2>&1; then audio_missing="$audio_missing pipewire-alsa"; fi
+        if ! pacman -Qi wireplumber >/dev/null 2>&1; then audio_missing="$audio_missing wireplumber"; fi
+        if [ -n "$audio_missing" ]; then
+            sudo_run pacman -S --needed --noconfirm $audio_missing
+        fi
+    elif have apt-get; then
+        if ! dpkg -s pipewire-pulse >/dev/null 2>&1; then
+            sudo_run apt-get update
+            sudo_run env DEBIAN_FRONTEND=noninteractive apt-get install -y pipewire pipewire-pulse wireplumber
+        fi
+    fi
+    run systemctl --user enable --now pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null || true
+}
+
 main() {
     trap write_failure_fingerprint ERR
 
@@ -1498,6 +1563,7 @@ EOF
     install_hyprland_session
     refresh_installed_registry_assets
     ensure_hyprland_shell_startup
+    ensure_audio_daemons
     install_greeter
     clean_display_manager
     write_install_fingerprint "complete"

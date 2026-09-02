@@ -1,6 +1,6 @@
 module github.com/acarlton5/HypeShell/core
 
-go 1.26.1
+go 1.26.6
 
 require (
 	github.com/Wifx/gonetworkmanager/v2 v2.2.0
@@ -23,8 +23,8 @@ require (
 	go.etcd.io/bbolt v1.4.3
 	go4.org/mem v0.0.0-20240501181205-ae6ca9944745
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
-	golang.org/x/image v0.39.0
-	tailscale.com v1.96.5
+	golang.org/x/image v0.41.0
+	tailscale.com v1.102.3
 )
 
 require (
@@ -63,9 +63,9 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yeqown/reedsolomon v1.0.0 // indirect
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba // indirect
-	golang.org/x/crypto v0.50.0 // indirect
-	golang.org/x/net v0.53.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/crypto v0.54.0 // indirect
+	golang.org/x/net v0.56.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
 	golang.zx2c4.com/wireguard/windows v1.0.1 // indirect
 )
 
@@ -82,7 +82,7 @@ require (
 	github.com/go-git/go-git/v6 v6.0.0-alpha.2
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0
-	github.com/mattn/go-isatty v0.0.22
+	github.com/mattn/go-isatty v0.0.23
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
@@ -93,9 +93,9 @@ require (
 	github.com/spf13/afero v1.15.0
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/sys v0.43.0
-	golang.org/x/text v0.36.0
-	gopkg.in/yaml.v3 v3.0.1
+	golang.org/x/sys v0.47.0
+	golang.org/x/text v0.40.0
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 // v0.0.1 tag is missing a LICENSE file; master has it.
